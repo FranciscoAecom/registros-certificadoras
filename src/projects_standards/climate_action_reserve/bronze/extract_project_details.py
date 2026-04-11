@@ -1,0 +1,499 @@
+# Objetivo do script:
+# Ler a lista bruta de uma data especifica, consultar o detalhe de cada projeto e salvar um JSON bronze por projeto.
+# Processo:
+# 1. Ler argumentos CLI (--date, --limit, parametros de ritmo e retry).
+# 2. Descompactar o snapshot se estiver zipado.
+# 3. Carregar lista de projetos do snapshot da data informada.
+# 4. Identificar projetos pendentes (sem arquivo de detalhe ou com --force).
+# 5. Exibir cabecalho com parametros da execucao.
+# 6. Para cada projeto, consultar o endpoint de detalhe da certificadora.
+# 7. Montar payload com source, list_data e detail_data.
+# 8. Salvar um JSON por projeto no diretorio projects/ do snapshot.
+# 9. Exibir progresso a cada 10 projetos (percentual e tempo restante).
+# 10. Registrar falhas individuais sem interromper a execucao.
+# 11. Exibir resumo final e gravar log de falhas se houver.
+# 12. Compactar o diretorio do snapshot em ZIP.
+
+
+import argparse
+import json
+import re
+import sys
+import time
+from datetime import datetime
+from html import unescape
+from html.parser import HTMLParser
+from http.cookiejar import CookieJar
+from pathlib import Path
+from typing import Any
+from urllib import error, request
+
+_ROOT = Path(__file__).resolve().parents[4]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
+
+
+BASE_URL = "https://thereserve2.apx.com"
+DETAIL_URL_TEMPLATE = BASE_URL + "/mymodule/reg/prjView.asp?id1={detail_id}"
+DEFAULT_SLEEP_SECONDS = 0.5
+DEFAULT_BATCH_SIZE = 10
+DEFAULT_BATCH_SLEEP_SECONDS = 2.0
+DEFAULT_PROGRESS_REPORT_EVERY = 10
+DEFAULT_TIMEOUT_SECONDS = 30.0
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/123.0.0.0 Safari/537.36"
+)
+
+
+class ProjectDetailParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_td = False
+        self.current_td_parts: list[str] = []
+        self.current_td_links: list[str] = []
+        self.current_row: list[dict[str, Any]] = []
+        self.rows: list[list[dict[str, Any]]] = []
+        self.current_link_href: str | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attrs_dict = dict(attrs)
+        if tag.lower() == "tr":
+            self.current_row = []
+        elif tag.lower() == "td":
+            self.in_td = True
+            self.current_td_parts = []
+            self.current_td_links = []
+        elif tag.lower() == "a" and self.in_td:
+            href = attrs_dict.get("href")
+            if href:
+                self.current_link_href = href
+                self.current_td_links.append(href)
+        elif tag.lower() == "br" and self.in_td:
+            self.current_td_parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        if tag == "a":
+            self.current_link_href = None
+        elif tag == "td" and self.in_td:
+            text = unescape("".join(self.current_td_parts)).strip()
+            self.current_row.append({"text": normalize_whitespace(text), "links": self.current_td_links[:]})
+            self.in_td = False
+            self.current_td_parts = []
+            self.current_td_links = []
+        elif tag == "tr":
+            if self.current_row:
+                self.rows.append(self.current_row[:])
+            self.current_row = []
+
+    def handle_data(self, data: str) -> None:
+        if self.in_td:
+            self.current_td_parts.append(data)
+
+
+# Normaliza espacos em branco em texto livre.
+def normalize_whitespace(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
+
+
+# Normaliza uma chave textual para uso consistente no parsing.
+def normalize_key(value: str) -> str:
+    normalized = value.strip().lower()
+    normalized = normalized.replace("/", " ")
+    normalized = normalized.replace("-", " ")
+    normalized = re.sub(r"[()]", "", normalized)
+    normalized = re.sub(r"[^a-z0-9]+", "_", normalized)
+    return normalized.strip("_")
+
+
+# Define e retorna os argumentos de linha de comando do script.
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Baixa e estrutura os detalhes dos projetos da Climate Action Reserve."
+    )
+    parser.add_argument(
+        "--date",
+        required=True,
+        help="Data de referencia no formato YYYYMMDD.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Limita o numero de projetos para teste.",
+    )
+    parser.add_argument(
+        "--sleep-seconds",
+        type=float,
+        default=DEFAULT_SLEEP_SECONDS,
+        help=(
+            "Intervalo entre requisicoes para reduzir agressividade. "
+            f"Padrao: {DEFAULT_SLEEP_SECONDS}."
+        ),
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help=(
+            "Quantidade de downloads concluidos antes de aplicar uma pausa extra. "
+            f"Padrao: {DEFAULT_BATCH_SIZE}."
+        ),
+    )
+    parser.add_argument(
+        "--batch-sleep-seconds",
+        type=float,
+        default=DEFAULT_BATCH_SLEEP_SECONDS,
+        help=(
+            "Pausa extra aplicada a cada bloco de downloads concluidos. "
+            f"Padrao: {DEFAULT_BATCH_SLEEP_SECONDS}."
+        ),
+    )
+    parser.add_argument(
+        "--progress-report-every",
+        type=int,
+        default=DEFAULT_PROGRESS_REPORT_EVERY,
+        help=(
+            "Intervalo de projetos concluidos entre relatorios curtos de progresso. "
+            f"Padrao: {DEFAULT_PROGRESS_REPORT_EVERY}."
+        ),
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=DEFAULT_TIMEOUT_SECONDS,
+        help=f"Timeout por requisicao em segundos. Padrao: {DEFAULT_TIMEOUT_SECONDS}.",
+    )
+    return parser.parse_args()
+
+
+# Valida a data informada e garante o formato YYYYMMDD.
+def validate_date(value: str) -> str:
+    try:
+        datetime.strptime(value, "%Y%m%d")
+    except ValueError as exc:
+        raise SystemExit(f"--date invalida: {value}. Use YYYYMMDD.") from exc
+    return value
+
+
+# Monta os metadados padronizados de source para o arquivo bronze de detalhe.
+def build_project_source(
+    *,
+    carbon_standard: str,
+    snapshot_date: str,
+    project_public_id: str,
+    project_internal_id: str,
+    project_url: str,
+    extra_fields: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    snapshot = datetime.strptime(snapshot_date, "%Y%m%d").date()
+    source = {
+        "carbon_standard": carbon_standard,
+        "snapshot_date": snapshot.isoformat(),
+        "reference_month": snapshot.replace(day=1).isoformat(),
+        "project_public_id": project_public_id,
+        "project_internal_id": project_internal_id,
+        "project_url": project_url,
+    }
+    if extra_fields:
+        source.update(extra_fields)
+    return source
+
+
+# Formata uma duracao em segundos para leitura rapida no terminal.
+def format_duration(seconds: float) -> str:
+    total_seconds = max(0, int(round(seconds)))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, secs = divmod(remainder, 60)
+    if hours > 0:
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+    return f"{minutes:02d}:{secs:02d}"
+
+
+# Estima o tempo restante com base no tempo medio por item ja processado.
+def estimate_remaining_seconds(started_at: float, completed_items: int, total_items: int) -> float:
+    if completed_items <= 0 or total_items <= completed_items:
+        return 0.0
+    elapsed_seconds = max(0.0, time.perf_counter() - started_at)
+    average_seconds = elapsed_seconds / completed_items
+    remaining_items = total_items - completed_items
+    return average_seconds * remaining_items
+
+
+# Emite um relatorio curto de progresso com percentual concluido e tempo restante medio.
+def print_progress_report(started_at: float, completed_items: int, total_items: int) -> None:
+    if total_items <= 0 or completed_items <= 0:
+        return
+    percent_complete = (completed_items / total_items) * 100
+    remaining_seconds = estimate_remaining_seconds(
+        started_at=started_at,
+        completed_items=completed_items,
+        total_items=total_items,
+    )
+    print(
+        f"progresso: {completed_items}/{total_items} ({percent_complete:.1f}%) | "
+        f"tempo restante estimado: {format_duration(remaining_seconds)}"
+    )
+
+
+# Monta os caminhos de entrada e saida usados pelo script.
+def build_paths(snapshot_date: str) -> tuple[Path, Path]:
+    root = Path(__file__).resolve().parents[4]
+    list_path = (
+        root
+        / "data"
+        / "project_standards"
+        / "01_bronze"
+        / "climate_action_reserve"
+        / snapshot_date
+        / "list"
+        / "projects.json"
+    )
+    projects_dir = (
+        root
+        / "data"
+        / "project_standards"
+        / "01_bronze"
+        / "climate_action_reserve"
+        / snapshot_date
+        / "projects"
+    )
+    return list_path, projects_dir
+
+
+# Monta o opener HTTP usado pela integracao.
+def build_opener() -> request.OpenerDirector:
+    cookie_jar = CookieJar()
+    return request.build_opener(request.HTTPCookieProcessor(cookie_jar))
+
+
+# Carrega os projetos salvos no snapshot bruto da lista.
+def load_projects(list_path: Path) -> list[dict[str, Any]]:
+    if not list_path.exists():
+        raise SystemExit(f"Arquivo da lista nao encontrado: {list_path}")
+
+    payload = json.loads(list_path.read_text(encoding="utf-8"))
+    projects = payload.get("projects")
+
+    if not isinstance(projects, list):
+        raise SystemExit(
+            f"Arquivo da lista invalido: chave 'projects' ausente ou invalida em {list_path}"
+        )
+
+    cleaned_projects: list[dict[str, Any]] = []
+    for index, project in enumerate(projects, start=1):
+        project_id = str(project.get("Project ID", "")).strip()
+        if not project_id:
+            print(
+                f"aviso: projeto na posicao {index} sem 'Project ID', ignorando",
+                file=sys.stderr,
+            )
+            continue
+        cleaned_projects.append(project)
+
+    return cleaned_projects
+
+
+# Extrai o identificador interno necessario para consultar o detalhe.
+def extract_detail_id(project_id: str) -> str:
+    match = re.search(r"(\d+)$", project_id)
+    if not match:
+        raise RuntimeError(
+            f"Nao foi possivel derivar o detail_id a partir de Project ID '{project_id}'."
+        )
+    return match.group(1)
+
+
+# Busca os dados necessarios na fonte remota.
+def fetch_detail_page(
+    opener: request.OpenerDirector,
+    detail_id: str,
+    timeout: float,
+) -> str:
+    detail_url = DETAIL_URL_TEMPLATE.format(detail_id=detail_id)
+    req = request.Request(
+        url=detail_url,
+        method="GET",
+        headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "User-Agent": USER_AGENT,
+            "Referer": detail_url,
+        },
+    )
+
+    try:
+        with opener.open(req, timeout=timeout) as response:
+            return response.read().decode("utf-8", errors="replace")
+    except error.HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"Erro HTTP {exc.code} ao consultar o projeto {detail_id}. Resposta: {details}"
+        ) from exc
+    except error.URLError as exc:
+        raise RuntimeError(f"Falha de rede ao consultar o projeto {detail_id}: {exc}") from exc
+
+
+# Interpreta os dados informados e retorna a estrutura normalizada.
+def parse_detail_data(detail_html: str) -> dict[str, Any]:
+    # O detalhe da CAR e uma tabela HTML simples de chave/valor.
+    parser = ProjectDetailParser()
+    parser.feed(detail_html)
+
+    detail_data: dict[str, Any] = {}
+    links: dict[str, str] = {}
+
+    for row in parser.rows:
+        if len(row) != 2:
+            continue
+        label = row[0]["text"].rstrip(":")
+        value = row[1]["text"]
+        if not label:
+            continue
+        detail_data[label] = value
+        if row[1]["links"]:
+            links[f"{normalize_key(label)}_url"] = make_absolute_url(row[1]["links"][0])
+
+    if links:
+        detail_data["related_links"] = links
+
+    return detail_data
+
+
+# Gera um valor auxiliar usado pelo restante do fluxo.
+def make_absolute_url(value: str) -> str:
+    if value.startswith("http://") or value.startswith("https://"):
+        return value
+    if value.startswith("/"):
+        return BASE_URL + value
+    return value
+
+
+# Salva o detalhe bruto do projeto no diretorio de destino.
+def save_project_details(
+    projects_dir: Path,
+    project_id: str,
+    payload: dict[str, Any],
+) -> None:
+    output_path = projects_dir / f"{project_id}.json"
+    output_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+# Orquestra o fluxo principal do script e imprime o resumo final da execucao.
+def main() -> int:
+    args = parse_args()
+    snapshot_date = validate_date(args.date)
+
+    if args.limit is not None and args.limit <= 0:
+        raise SystemExit("--limit deve ser maior que zero.")
+    if args.batch_size <= 0:
+        raise SystemExit("--batch-size deve ser maior que zero.")
+
+    list_path, projects_dir = build_paths(snapshot_date)
+
+    # Descompacta o snapshot se estiver zipado
+    snapshot_dir = list_path.parent.parent
+    zip_path = snapshot_dir.parent / f"{snapshot_dir.name}.zip"
+    unpacked = False
+    if not snapshot_dir.exists() and zip_path.exists():
+        unpack_archive(zip_path, label="bronze", step=1, total=1)
+        unpacked = True
+
+    projects = load_projects(list_path)
+
+    total_detected = len(projects)
+    if args.limit is not None:
+        projects = projects[: args.limit]
+
+    total_to_process = len(projects)
+    projects_dir.mkdir(parents=True, exist_ok=True)
+
+    print("Iniciando extracao de detalhes de projetos da Climate Action Reserve")
+    print(f"lista carregada de: {list_path}")
+    print(f"total detectado na lista: {total_detected}")
+    print(f"total a processar nesta execucao: {total_to_process}")
+    print(f"endpoint de detalhe: {DETAIL_URL_TEMPLATE}")
+    print(f"pausa entre projetos: {args.sleep_seconds} segundos")
+    print(
+        "pausa extra a cada bloco: "
+        f"{args.batch_sleep_seconds} segundos a cada {args.batch_size} projetos"
+    )
+    print(f"diretorio de saida: {projects_dir}")
+
+    opener = build_opener()
+    success_count = 0
+    failure_count = 0
+    skipped_count = 0
+    started_at = time.perf_counter()
+
+    for index, list_project in enumerate(projects, start=1):
+        project_id = str(list_project["Project ID"]).strip()
+        print(f"inicio download do projeto {project_id} ({index}/{total_to_process})")
+
+        try:
+            # O id numerico usado no detalhe e derivado do Project ID da lista.
+            detail_id = extract_detail_id(project_id)
+            detail_html = fetch_detail_page(
+                opener=opener,
+                detail_id=detail_id,
+                timeout=args.timeout,
+            )
+            detail_data = parse_detail_data(detail_html)
+            detail_url = DETAIL_URL_TEMPLATE.format(detail_id=detail_id)
+
+            # O bronze preserva a linha da lista e o parse estruturado do detalhe.
+            payload = {
+                "source": build_project_source(
+                    carbon_standard="climate_action_reserve",
+                    snapshot_date=snapshot_date,
+                    project_public_id=project_id,
+                    project_internal_id=detail_id,
+                    project_url=detail_url,
+                ),
+                "list_data": list_project,
+                "detail_data": detail_data,
+            }
+
+            save_project_details(projects_dir=projects_dir, project_id=project_id, payload=payload)
+            success_count += 1
+            print(f"fim download do projeto {project_id}")
+        except Exception as exc:
+            failure_count += 1
+            print(f"falha no projeto {project_id}: {exc}", file=sys.stderr)
+
+        completed_items = success_count + failure_count + skipped_count
+        if completed_items % args.progress_report_every == 0 or completed_items == total_to_process:
+            print_progress_report(started_at=started_at, completed_items=completed_items, total_items=total_to_process)
+        if index < total_to_process:
+            time.sleep(max(0.0, args.sleep_seconds))
+            if index % args.batch_size == 0:
+                print(
+                    "pausa extra de "
+                    f"{args.batch_sleep_seconds} segundos apos {index} projetos"
+                )
+                time.sleep(max(0.0, args.batch_sleep_seconds))
+
+    print("resumo final:")
+    print(f"projetos com sucesso: {success_count}")
+    print(f"projetos com falha: {failure_count}")
+    print(f"projetos pulados: {skipped_count}")
+    print(f"diretorio de saida: {projects_dir}")
+
+    # Compacta o diretorio do snapshot em ZIP
+    pack_directory(snapshot_dir, label="bronze", step=1, total=1)
+
+    return 0 if failure_count == 0 else 1
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1) from exc

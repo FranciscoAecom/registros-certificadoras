@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "plan_vivo",
+    "snapshot_date": "20260402",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-02T16:48:38Z",
+  "failure_count": 0,
+  "failures": []
+}

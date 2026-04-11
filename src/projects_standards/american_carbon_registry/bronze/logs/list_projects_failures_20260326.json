@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "american_carbon_registry",
+    "snapshot_date": "20260326",
+    "script": "list_projects.py"
+  },
+  "updated_at": "2026-03-27T18:58:21Z",
+  "failure_count": 0,
+  "failures": []
+}

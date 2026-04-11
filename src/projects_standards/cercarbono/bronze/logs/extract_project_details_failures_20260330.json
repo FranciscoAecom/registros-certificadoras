@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "cercarbono",
+    "snapshot_date": "20260330",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-03-30T14:24:21Z",
+  "failure_count": 0,
+  "failures": []
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "project_id": "fes-enying-cameroon",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/fes-enying-cameroon.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "kukumuty-mozambique",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/kukumuty-mozambique.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "nguru-forest-tanzania",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/nguru-forest-tanzania.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "olympic-forest-mali-and-senegal",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/olympic-forest-mali-and-senegal.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "paskaia-mosquita-honduras",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/paskaia-mosquita-honduras.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "rarakau-new-zealand",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/rarakau-new-zealand.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "voa-aina-madagascar",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/voa-aina-madagascar.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "yaeda-eyasi-landscape-tanzania",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/yaeda-eyasi-landscape-tanzania.json",
+    "error": "name 'parse_count' is not defined"
+  },
+  {
+    "project_id": "zerocarbon-guatemala",
+    "file_path": "data/project_standards/01_bronze/plan_vivo/20260326/projects/zerocarbon-guatemala.json",
+    "error": "name 'parse_count' is not defined"
+  }
+]

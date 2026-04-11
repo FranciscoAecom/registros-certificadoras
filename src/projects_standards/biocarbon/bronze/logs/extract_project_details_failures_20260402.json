@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "biocarbon",
+    "snapshot_date": "20260402",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-02T15:40:03Z",
+  "failure_count": 0,
+  "failures": []
+}

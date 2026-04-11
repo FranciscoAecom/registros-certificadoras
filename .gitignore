@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Temporary exploration and download artifacts
+.tmp_*/
+car_*.txt
+car_*.csv
+car_*.html
+gs_index.js
+gs_*.js
+verra_main.js
+reportEmbed*.js
+
+# Bronze: versionar apenas ZIPs, ignorar JSONs soltos
+data/project_standards/01_bronze/**/list/
+data/project_standards/01_bronze/**/projects/
+
+# Silver: versionar apenas ZIPs, ignorar JSONs soltos
+data/project_standards/02_silver/**/*.json
+data/project_standards/02_silver/**/*.csv
+
+# Gold: versionar apenas ZIPs, ignorar arquivos soltos
+data/project_standards/03_gold/projects/*.json
+data/project_standards/03_gold/projects/*.xlsx
+data/project_standards/03_gold/projects/backup/
+
+
+data/project_standards/**/*.zip

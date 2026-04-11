@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "social_carbon",
+    "snapshot_date": "20260326",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-02T15:10:06Z",
+  "failure_count": 0,
+  "failures": []
+}

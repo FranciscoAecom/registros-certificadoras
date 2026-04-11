@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "equitable_earth",
+    "snapshot_date": "20260402",
+    "script": "extract_project_list.py"
+  },
+  "updated_at": "2026-04-02T16:45:47Z",
+  "failure_count": 0,
+  "failures": []
+}

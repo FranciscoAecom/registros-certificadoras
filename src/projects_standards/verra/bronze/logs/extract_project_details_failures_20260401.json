@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "verra",
+    "snapshot_date": "20260401",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-01T20:22:46Z",
+  "failure_count": 0,
+  "failures": []
+}

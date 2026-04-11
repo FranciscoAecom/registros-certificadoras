@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "gold_standard",
+    "snapshot_date": "20260325",
+    "script": "list_projects.py"
+  },
+  "updated_at": "2026-03-27T13:15:42Z",
+  "failure_count": 0,
+  "failures": []
+}

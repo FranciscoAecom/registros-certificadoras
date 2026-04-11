@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "american_carbon_registry",
+    "snapshot_date": "20260402",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-02T15:38:28Z",
+  "failure_count": 0,
+  "failures": []
+}

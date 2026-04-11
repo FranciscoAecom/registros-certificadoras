@@ -1,0 +1,13 @@
+{
+  "source": {
+    "carbon_standard": "verra",
+    "program": "VCS",
+    "issuance_month": "2008-11",
+    "query_start": "2008-11-01",
+    "query_end": "2008-11-30",
+    "endpoint": "https://registry.verra.org/uiapi/asset/asset/search",
+    "extracted_at": "2026-04-01T19:21:29Z",
+    "record_count": 0
+  },
+  "data": []
+}
