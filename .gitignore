@@ -1,9 +1,14 @@
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
 
 # Virtual environment
 .venv/
+.venv_geo/
 
 # Temporary exploration and download artifacts
 .tmp_*/
@@ -15,18 +20,21 @@ gs_*.js
 verra_main.js
 reportEmbed*.js
 
-# Bronze: versionar apenas ZIPs, ignorar JSONs soltos
+# Bronze: ignorar listas e projetos soltos
 data/project_standards/01_bronze/**/list/
 data/project_standards/01_bronze/**/projects/
 
-# Silver: versionar apenas ZIPs, ignorar JSONs soltos
+# Silver: ignorar arquivos tabulares intermediarios
 data/project_standards/02_silver/**/*.json
 data/project_standards/02_silver/**/*.csv
 
-# Gold: versionar apenas ZIPs, ignorar arquivos soltos
+# Gold: ignorar arquivos analiticos gerados
 data/project_standards/03_gold/projects/*.json
 data/project_standards/03_gold/projects/*.xlsx
 data/project_standards/03_gold/projects/backup/
 
 
-data/project_standards/**/*.zip
+# Ignore only ZIPs that exceed GitHub's 100 MB file limit
+data/project_standards/01_bronze/verra/20260402.zip
+data/project_standards/02_silver/verra/20260402.zip
+data/project_standards/03_gold/projects/2026-04.zip
