@@ -39,12 +39,22 @@ DETAIL_PAGE_URL = "https://registry.verra.org/app/projectDetail/VCS"
 DEFAULT_SLEEP_SECONDS = 0.5
 DEFAULT_BATCH_SIZE = 10
 DEFAULT_BATCH_SLEEP_SECONDS = 2.0
+DEFAULT_SPATIAL_DOCUMENT_SLEEP_SECONDS = 0.0
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_RETRY_ATTEMPTS = 3
 DEFAULT_RETRY_SLEEP_SECONDS = 5.0
 DEFAULT_RETRY_BACKOFF_FACTOR = 2.0
 DEFAULT_MAX_RETRY_SLEEP_SECONDS = 60.0
 DEFAULT_PROGRESS_REPORT_EVERY = 10
+SAFE_MODE_SLEEP_SECONDS = 2.0
+SAFE_MODE_BATCH_SIZE = 10
+SAFE_MODE_BATCH_SLEEP_SECONDS = 8.0
+SAFE_MODE_SPATIAL_DOCUMENT_SLEEP_SECONDS = 2.0
+SAFE_MODE_TIMEOUT_SECONDS = 45.0
+SAFE_MODE_RETRY_ATTEMPTS = 6
+SAFE_MODE_RETRY_SLEEP_SECONDS = 6.0
+SAFE_MODE_RETRY_BACKOFF_FACTOR = 2.0
+SAFE_MODE_MAX_RETRY_SLEEP_SECONDS = 90.0
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -188,6 +198,7 @@ def enrich_spatial_documents(
     retry_backoff_factor: float,
     max_retry_sleep_seconds: float,
     retry_jitter_seconds: float,
+    spatial_document_sleep_seconds: float,
     ssl_context: ssl.SSLContext,
 ) -> None:
     spatial_documents = collect_spatial_documents(detail_payload)
@@ -195,7 +206,7 @@ def enrich_spatial_documents(
         return
 
     enriched_documents: list[dict[str, Any]] = []
-    for document in spatial_documents:
+    for document_index, document in enumerate(spatial_documents, start=1):
         uri = str(document.get("uri") or "").strip()
         enriched = dict(document)
         try:
@@ -224,6 +235,8 @@ def enrich_spatial_documents(
         except Exception as exc:  # noqa: BLE001
             enriched["downloadError"] = str(exc)
         enriched_documents.append(enriched)
+        if document_index < len(spatial_documents) and spatial_document_sleep_seconds > 0:
+            time.sleep(spatial_document_sleep_seconds)
 
     if enriched_documents:
         detail_payload["spatial_documents"] = enriched_documents
@@ -238,6 +251,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sleep-seconds", type=float, default=DEFAULT_SLEEP_SECONDS, help=f"Intervalo entre projetos. Padrao: {DEFAULT_SLEEP_SECONDS}.")
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help=f"Quantidade de downloads concluidos antes da pausa extra. Padrao: {DEFAULT_BATCH_SIZE}.")
     parser.add_argument("--batch-sleep-seconds", type=float, default=DEFAULT_BATCH_SLEEP_SECONDS, help=f"Pausa extra aplicada a cada bloco de downloads. Padrao: {DEFAULT_BATCH_SLEEP_SECONDS}.")
+    parser.add_argument("--spatial-document-sleep-seconds", type=float, default=DEFAULT_SPATIAL_DOCUMENT_SLEEP_SECONDS, help="Pausa adicional entre downloads consecutivos de documentos espaciais do mesmo projeto.")
     parser.add_argument("--retry-attempts", type=int, default=DEFAULT_RETRY_ATTEMPTS, help=f"Tentativas adicionais quando houver 429. Padrao: {DEFAULT_RETRY_ATTEMPTS}.")
     parser.add_argument("--retry-sleep-seconds", type=float, default=DEFAULT_RETRY_SLEEP_SECONDS, help=f"Espera entre tentativas apos 429. Padrao: {DEFAULT_RETRY_SLEEP_SECONDS}.")
     parser.add_argument("--retry-backoff-factor", type=float, default=DEFAULT_RETRY_BACKOFF_FACTOR, help=f"Fator de backoff exponencial entre tentativas. Padrao: {DEFAULT_RETRY_BACKOFF_FACTOR}.")
@@ -245,6 +259,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--retry-jitter-seconds", type=float, default=0.5, help="Ruido aleatorio somado ao retry para reduzir rajadas sincronizadas.")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS, help=f"Timeout por requisicao em segundos. Padrao: {DEFAULT_TIMEOUT_SECONDS}.")
     parser.add_argument("--safe-mode", action="store_true", help="Ativa defaults conservadores de ritmo/retry para reduzir risco de bloqueio.")
+    parser.add_argument("--skip-spatial-documents", action="store_true", help="Nao baixa anexos KML/KMZ nesta execucao; preserva apenas o detalhe principal do endpoint.")
     parser.add_argument("--insecure-ssl", action="store_true", help="Desativa verificacao de certificado TLS para ambientes sem cadeia CA configurada.")
     parser.add_argument("--overwrite-existing", action="store_true", help="Sobrescreve arquivos de detalhe ja salvos para a mesma data.")
     return parser.parse_args()
@@ -472,21 +487,23 @@ def main() -> int:
     snapshot_date = validate_date(args.date)
     if args.safe_mode:
         if args.sleep_seconds == DEFAULT_SLEEP_SECONDS:
-            args.sleep_seconds = 1.5
+            args.sleep_seconds = SAFE_MODE_SLEEP_SECONDS
         if args.batch_size == DEFAULT_BATCH_SIZE:
-            args.batch_size = 10
+            args.batch_size = SAFE_MODE_BATCH_SIZE
         if args.batch_sleep_seconds == DEFAULT_BATCH_SLEEP_SECONDS:
-            args.batch_sleep_seconds = 5.0
+            args.batch_sleep_seconds = SAFE_MODE_BATCH_SLEEP_SECONDS
+        if args.spatial_document_sleep_seconds == DEFAULT_SPATIAL_DOCUMENT_SLEEP_SECONDS:
+            args.spatial_document_sleep_seconds = SAFE_MODE_SPATIAL_DOCUMENT_SLEEP_SECONDS
         if args.retry_attempts == DEFAULT_RETRY_ATTEMPTS:
-            args.retry_attempts = 6
+            args.retry_attempts = SAFE_MODE_RETRY_ATTEMPTS
         if args.retry_sleep_seconds == DEFAULT_RETRY_SLEEP_SECONDS:
-            args.retry_sleep_seconds = 3.0
+            args.retry_sleep_seconds = SAFE_MODE_RETRY_SLEEP_SECONDS
         if args.retry_backoff_factor == DEFAULT_RETRY_BACKOFF_FACTOR:
-            args.retry_backoff_factor = 2.0
+            args.retry_backoff_factor = SAFE_MODE_RETRY_BACKOFF_FACTOR
         if args.max_retry_sleep_seconds == DEFAULT_MAX_RETRY_SLEEP_SECONDS:
-            args.max_retry_sleep_seconds = 60.0
+            args.max_retry_sleep_seconds = SAFE_MODE_MAX_RETRY_SLEEP_SECONDS
         if args.timeout == DEFAULT_TIMEOUT_SECONDS:
-            args.timeout = 45.0
+            args.timeout = SAFE_MODE_TIMEOUT_SECONDS
 
     if args.limit is not None and args.limit <= 0:
         raise SystemExit("--limit deve ser maior que zero.")
@@ -502,6 +519,8 @@ def main() -> int:
         raise SystemExit("--max-retry-sleep-seconds deve ser maior que zero.")
     if args.retry_jitter_seconds < 0:
         raise SystemExit("--retry-jitter-seconds nao pode ser negativo.")
+    if args.spatial_document_sleep_seconds < 0:
+        raise SystemExit("--spatial-document-sleep-seconds nao pode ser negativo.")
     ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
 
     list_path, projects_dir, errors_path = build_paths(snapshot_date)
@@ -532,12 +551,14 @@ def main() -> int:
     print(f"endpoint de detalhe: {BASE_URL}/<project_id>")
     print(f"pausa entre projetos: {args.sleep_seconds:.1f} segundos")
     print(f"pausa extra a cada bloco: {args.batch_sleep_seconds:.1f} segundos a cada {args.batch_size} projetos")
+    print(f"pausa entre documentos espaciais: {args.spatial_document_sleep_seconds:.1f} segundos")
     print(
         f"retry em 429/5xx/rede: {args.retry_attempts} tentativas adicionais, "
         f"espera base {args.retry_sleep_seconds:.1f}s, backoff x{args.retry_backoff_factor:.2f}, "
         f"teto {args.max_retry_sleep_seconds:.1f}s, jitter {args.retry_jitter_seconds:.1f}s"
     )
     print(f"modo safe: {'ativo' if args.safe_mode else 'desativado'}")
+    print(f"anexos espaciais: {'ignorar nesta execucao' if args.skip_spatial_documents else 'baixar e anexar ao bronze'}")
     print(f"modo SSL: {'insecure' if args.insecure_ssl else 'default'}")
     print(f"arquivo de falhas: {errors_path}")
     print(f"diretorio de saida: {projects_dir}")
@@ -570,16 +591,18 @@ def main() -> int:
                 retry_jitter_seconds=args.retry_jitter_seconds,
                 ssl_context=ssl_context,
             )
-            enrich_spatial_documents(
-                detail_payload,
-                timeout=args.timeout,
-                retry_attempts=args.retry_attempts,
-                retry_sleep_seconds=args.retry_sleep_seconds,
-                retry_backoff_factor=args.retry_backoff_factor,
-                max_retry_sleep_seconds=args.max_retry_sleep_seconds,
-                retry_jitter_seconds=args.retry_jitter_seconds,
-                ssl_context=ssl_context,
-            )
+            if not args.skip_spatial_documents:
+                enrich_spatial_documents(
+                    detail_payload,
+                    timeout=args.timeout,
+                    retry_attempts=args.retry_attempts,
+                    retry_sleep_seconds=args.retry_sleep_seconds,
+                    retry_backoff_factor=args.retry_backoff_factor,
+                    max_retry_sleep_seconds=args.max_retry_sleep_seconds,
+                    retry_jitter_seconds=args.retry_jitter_seconds,
+                    spatial_document_sleep_seconds=args.spatial_document_sleep_seconds,
+                    ssl_context=ssl_context,
+                )
             payload = {
                 "source": build_project_source(
                     carbon_standard="verra",

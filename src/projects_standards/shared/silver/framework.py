@@ -919,8 +919,6 @@ def run_mapping(config: dict[str, Any]) -> int:
     unpacked = unpack_bronze_if_needed(bronze_dir)
 
     try:
-        if not list_path.exists():
-            raise SystemExit(f"Arquivo da lista nao encontrado: {list_path}")
         if not projects_dir.exists():
             raise SystemExit(f"Diretorio de projetos nao encontrado: {projects_dir}")
 
@@ -1003,8 +1001,6 @@ def run_dataset(config: dict[str, Any]) -> int:
     unpacked = unpack_bronze_if_needed(bronze_dir)
 
     try:
-        if not list_path.exists():
-            raise SystemExit(f"Arquivo da lista nao encontrado: {list_path}")
         if not projects_dir.exists():
             raise SystemExit(f"Diretorio de projetos nao encontrado: {projects_dir}")
         if not REFERENCE_PATH.exists():
@@ -1023,7 +1019,10 @@ def run_dataset(config: dict[str, Any]) -> int:
 
         print(f"Iniciando consolidacao silver da {config['display_name']}")
         print(f"snapshot analisado: {snapshot_date}")
-        print(f"arquivo da lista: {list_path}")
+        if list_path.exists():
+            print(f"arquivo da lista: {list_path}")
+        else:
+            print(f"arquivo da lista: ausente em {list_path}; usando list_data embutido nos detalhes")
         print(f"diretorio de detalhes: {projects_dir}")
         print(f"total de arquivos de detalhe detectados: {len(detail_files)}")
         print(f"arquivo de saida: {output_path}")

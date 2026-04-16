@@ -32,3 +32,6 @@
 - Manter log operacional em `logs/`.
 - Nao trocar o endpoint oficial por scraping do HTML enquanto a API continuar estavel.
 - Sempre que houver `KML/KMZ` em `documentGroups`, baixar e preservar o conteudo bruto em `detail_data.spatial_documents`.
+- Para coletas completas com milhares de projetos, preferir `--safe-mode` para endurecer pausas, timeout e retry.
+- O script aceita `--spatial-document-sleep-seconds` para reduzir rajadas ao baixar varios anexos espaciais do mesmo projeto.
+- Em cenarios de risco operacional elevado, `--skip-spatial-documents` pode ser usado para concluir primeiro a coleta completa do detalhe principal e deixar o backfill de `KML/KMZ` para uma etapa separada.
