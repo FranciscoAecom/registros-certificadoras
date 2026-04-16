@@ -104,6 +104,8 @@ def collect_spatial_documents(detail_payload: dict[str, Any]) -> list[dict[str, 
             continue
         documents = group.get("documents")
         if not isinstance(documents, list):
+            documents = group.get("projectDocuments")
+        if not isinstance(documents, list):
             continue
         for document in documents:
             if not isinstance(document, dict):
@@ -473,7 +475,19 @@ def existing_output_is_valid(output_path: Path, project_id: str) -> bool:
         return False
     source = payload.get("source")
     detail_data = payload.get("detail_data")
-    return isinstance(source, dict) and isinstance(detail_data, dict) and source.get("project_public_id") == project_id
+    if not (isinstance(source, dict) and isinstance(detail_data, dict) and source.get("project_public_id") == project_id):
+        return False
+
+    spatial_documents = detail_data.get("spatial_documents")
+    has_enriched_spatial_documents = isinstance(spatial_documents, list) and len(spatial_documents) > 0
+    references_spatial_documents = len(collect_spatial_documents(detail_data)) > 0
+
+    # Reprocessa detalhes antigos quando a pagina referencia KML/KMZ, mas o bronze salvo
+    # ainda nao preservou esses anexos em detail_data.spatial_documents.
+    if references_spatial_documents and not has_enriched_spatial_documents:
+        return False
+
+    return True
 
 
 # Salva o detalhe bruto do projeto no diretorio de destino.

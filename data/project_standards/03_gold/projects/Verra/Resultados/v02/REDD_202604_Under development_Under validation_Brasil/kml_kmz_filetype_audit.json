@@ -1,0 +1,301 @@
+{
+  "scanned_kml_kmz_named_files": 52,
+  "renamed_files": 17,
+  "renamed": [
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2586\\APPENDIX DOCUMENT LINK #2586.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2586\\APPENDIX DOCUMENT LINK #2586__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\MR Local Language Ribeirinho REDD.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\MR Local Language Ribeirinho REDD__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\VCS Listing Representation Ribeirinho REDD Project.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\VCS Listing Representation Ribeirinho REDD Project__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3304\\3304_Public Comment Summary.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3304\\3304_Public Comment Summary__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\CCB_VCS_MR_1_IPOA_v2.2.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\CCB_VCS_MR_1_IPOA_v2.2__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\Verra-Registry-Communications-Agreement-multiple-PPs_Ipoa.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\Verra-Registry-Communications-Agreement-multiple-PPs_Ipoa__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3631\\VCS_PROJ_DESC_PCP_3631_31MAR2023.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3631\\VCS_PROJ_DESC_PCP_3631_31MAR2023__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4142\\Accession-Listing-Representation-Serenity Valley_VF.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4142\\Accession-Listing-Representation-Serenity Valley_VF__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4461\\VCS-Listing-Representation-Multiple-Representors-(Mata e MyCarbon).pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4461\\VCS-Listing-Representation-Multiple-Representors-(Mata e MyCarbon)__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4552\\VCS-Listing-Representation-Multiple- YACO2.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4552\\VCS-Listing-Representation-Multiple- YACO2__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4905\\Listing-Representation-Single-PP-v4.2_v3.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4905\\Listing-Representation-Single-PP-v4.2_v3__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5087\\Listing-Representatition KAA PYAHU.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5087\\Listing-Representatition KAA PYAHU__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5343\\VCS Draft Project Description.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5343\\VCS Draft Project Description__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5390\\VCS-Listing-Representation ID5390.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5390\\VCS-Listing-Representation ID5390__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5415\\CCB VCS PD 5415 DRAFT 14012025.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5415\\CCB VCS PD 5415 DRAFT 14012025__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\CCB VCS DRAFT 5565 XIKRIN DO CATETE Vs. 1.1 PORT.pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\CCB VCS DRAFT 5565 XIKRIN DO CATETE Vs. 1.1 PORT__renamed_1.pdf",
+      "detected_type": "pdf"
+    },
+    {
+      "from": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\Verra-Registry-Communications-Agreement-multiple-PPs-4753635-v1-SYDDMS....pdf.kml",
+      "to": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\Verra-Registry-Communications-Agreement-multiple-PPs-4753635-v1-SYDDMS...__renamed_1.pdf",
+      "detected_type": "pdf"
+    }
+  ],
+  "audit": [
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\1561\\GSE_KML_AGO2016_001.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2586\\APPENDIX DOCUMENT LINK #2586.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2586\\Fazenda_Mata_Mata.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2587\\Fazenda_Mata_Mata_II.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\MR Local Language Ribeirinho REDD.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\Ribeirinho REDD.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\2620\\VCS Listing Representation Ribeirinho REDD Project.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3055\\10022023_Project Area_ITAUBA.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3281\\Fazenda Santa Rita (Andrade Sun Farm).kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3304\\3304_Public Comment Summary.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3304\\BoaEsperanca_PA.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\CCB_VCS_MR_1_IPOA_v2.2.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\PA IPOA.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3324\\Verra-Registry-Communications-Agreement-multiple-PPs_Ipoa.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3332\\3332 property_bound.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3631\\new_Project_area_KML(1).kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\3631\\VCS_PROJ_DESC_PCP_3631_31MAR2023.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4142\\Accession-Listing-Representation-Serenity Valley_VF.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4142\\Project_Area_Serenity_Valley.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4452\\Guariba_PA.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4461\\GLEBA_PARANACRE.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4461\\VCS-Listing-Representation-Multiple-Representors-(Mata e MyCarbon).pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4552\\AP_AUD_IACO_31052023.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4552\\VCS-Listing-Representation-Multiple- YACO2.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4633\\PAs_Ituxi_2.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4689\\sao-felix-do-xingu.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4747\\20231003-11-property-boundaries.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4747\\pantanal-program-boundaries-new.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4761\\LimiteYutai_Brasil.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4825\\PA_EG_2.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4834\\project-area-seringal-rio-branco.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4905\\Listing-Representation-Single-PP-v4.2_v3.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\4905\\REDD_Pantanal_PAI01_Bodoquena_Pantanal.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5025\\guaranatuba project vf.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5044\\ARAGUAIA REDD+ BOCALON PROJECT.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5055\\PA_AUD_v1.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5087\\Area_Projeto_KAAPYAHU.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5087\\Listing-Representatition KAA PYAHU.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5295\\PROJETO_AGROFLORESTAL ID 5295.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5343\\STOCK CAPITAL MAZUAY KML.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5343\\VCS Draft Project Description.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5390\\KML_project area final.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5390\\VCS-Listing-Representation ID5390.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5391\\COLORADO_PROJECTID5391.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5415\\CCB VCS PD 5415 DRAFT 14012025.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5415\\instance 1_boundary_Vale do rio Branco REDD+ grouped project.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5430\\Cultivar Progresso REDD+.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5527\\PA_PRELIMINAR_MANDASSAIA_v1.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\CCB VCS DRAFT 5565 XIKRIN DO CATETE Vs. 1.1 PORT.pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\Verra-Registry-Communications-Agreement-multiple-PPs-4753635-v1-SYDDMS....pdf.kml",
+      "detected_type": "pdf"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5565\\Xikrin_do_Rio_Catete_Project_.kml",
+      "detected_type": "kml"
+    },
+    {
+      "path": "data\\project_standards\\03_gold\\projects\\Verra\\Resultados\\v02\\REDD_202604_Under development_Under validation_Brasil\\5637\\kml_cachoeira_seca.kml",
+      "detected_type": "kml"
+    }
+  ]
+}
