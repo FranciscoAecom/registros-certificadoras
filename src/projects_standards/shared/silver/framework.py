@@ -602,7 +602,9 @@ def repack_bronze(bronze_dir: Path) -> None:
 # Grava um payload JSON UTF-8 no caminho informado.
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    # Usa json.dump em streaming para evitar duplicar grandes payloads em memoria.
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
 # Monta e retorna o parser de argumentos para o script de mapeamento.
@@ -1066,8 +1068,20 @@ def run_dataset(config: dict[str, Any]) -> int:
             "projects": records,
         }
         write_json(output_path, snapshot_payload)
-        reference_sync_changes = sync_reference_dataset_observed()
-        print(f"referencias observadas sincronizadas: {reference_sync_changes}")
+        try:
+            reference_sync_changes = sync_reference_dataset_observed()
+            print(f"referencias observadas sincronizadas: {reference_sync_changes}")
+        except MemoryError:
+            reference_sync_changes = {
+                "warning": (
+                    "Sincronizacao automatica do reference_dataset pulada por limite de memoria "
+                    "ao ler datasets silver muito grandes."
+                )
+            }
+            print(
+                "aviso: sincronizacao automatica do reference_dataset foi pulada por limite de memoria; "
+                "o dataset silver foi gerado normalmente."
+            )
 
         for hook in config.get("post_build_hooks", []):
             hook(
