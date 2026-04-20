@@ -297,12 +297,31 @@ def _parse_kml_coordinates_text(text: str) -> list[list[float]]:
     return points
 
 
+# Corrige problemas XML recorrentes em KMLs da Verra antes do parsing.
+def _sanitize_kml_text(kml_text: str) -> str:
+    text = kml_text.strip()
+    if not text:
+        return text
+
+    # Alguns KMLs usam xsi:schemaLocation sem declarar xmlns:xsi.
+    if "xsi:" in text and "xmlns:xsi" not in text:
+        text = re.sub(
+            r"(<kml\b[^>]*)(>)",
+            r'\1 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\2',
+            text,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+
+    return text
+
+
 # Extrai geometria GeoJSON-like a partir de conteudo KML bruto.
 def _extract_geometry_from_kml_text(kml_text: str) -> dict[str, Any] | None:
     if not isinstance(kml_text, str) or not kml_text.strip():
         return None
     try:
-        root = ET.fromstring(kml_text)
+        root = ET.fromstring(_sanitize_kml_text(kml_text))
     except ET.ParseError:
         return None
 
