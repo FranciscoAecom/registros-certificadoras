@@ -316,6 +316,28 @@ def _sanitize_kml_text(kml_text: str) -> str:
     return text
 
 
+# Converte um bloco LatLonBox em um anel fechado no padrao lon/lat.
+def _polygon_from_latlon_box(node: ET.Element) -> list[list[float]] | None:
+    values: dict[str, float] = {}
+    for key in ("north", "south", "east", "west"):
+        child = node.find(f".//{{*}}{key}")
+        if child is None or child.text is None:
+            return None
+        value = _to_coordinate(child.text)
+        if value is None:
+            return None
+        values[key] = value
+
+    return _close_ring(
+        [
+            [values["west"], values["north"]],
+            [values["east"], values["north"]],
+            [values["east"], values["south"]],
+            [values["west"], values["south"]],
+        ]
+    )
+
+
 # Extrai geometria GeoJSON-like a partir de conteudo KML bruto.
 def _extract_geometry_from_kml_text(kml_text: str) -> dict[str, Any] | None:
     if not isinstance(kml_text, str) or not kml_text.strip():
@@ -335,11 +357,32 @@ def _extract_geometry_from_kml_text(kml_text: str) -> dict[str, Any] | None:
             rings.append(_close_ring(points))
 
     if not rings:
+        for node in root.findall(".//{*}LatLonBox"):
+            ring = _polygon_from_latlon_box(node)
+            if ring is not None:
+                rings.append(ring)
+
+    if not rings:
         return None
     if len(rings) == 1:
         return {"type": "Polygon", "coordinates": [rings[0]]}
     # Cada ring vira um poligono simples dentro do MultiPolygon: [[ring]]
     return {"type": "MultiPolygon", "coordinates": [[ring] for ring in rings]}
+
+
+# Tenta extrair geometria de um conteudo KMZ bruto.
+def _extract_geometry_from_kmz_bytes(kmz_bytes: bytes) -> dict[str, Any] | None:
+    try:
+        with zipfile.ZipFile(io.BytesIO(kmz_bytes)) as kmz:
+            kml_candidates = [name for name in kmz.namelist() if name.lower().endswith(".kml")]
+            for kml_name in kml_candidates:
+                kml_text = kmz.read(kml_name).decode("utf-8", errors="replace")
+                geometry = _extract_geometry_from_kml_text(kml_text)
+                if geometry is not None:
+                    return geometry
+    except Exception:  # noqa: BLE001
+        return None
+    return None
 
 
 # Extrai geometria a partir do bloco bronze detail_data.spatial_documents.
@@ -357,16 +400,18 @@ def _extract_geometry_from_spatial_documents(spatial_documents: Any) -> dict[str
             # KMZ: descompacta o primeiro arquivo .kml disponível.
             try:
                 kmz_bytes = base64.b64decode(content, validate=False)
-                with zipfile.ZipFile(io.BytesIO(kmz_bytes)) as kmz:
-                    kml_candidates = [name for name in kmz.namelist() if name.lower().endswith(".kml")]
-                    for kml_name in kml_candidates:
-                        kml_text = kmz.read(kml_name).decode("utf-8", errors="replace")
-                        geometry = _extract_geometry_from_kml_text(kml_text)
-                        if geometry is not None:
-                            return geometry
+                geometry = _extract_geometry_from_kmz_bytes(kmz_bytes)
+                if geometry is not None:
+                    return geometry
             except Exception:  # noqa: BLE001
                 continue
             continue
+
+        # Alguns downloads da Verra são KMZ válidos servidos com extensão .kml.
+        if content.startswith("PK"):
+            geometry = _extract_geometry_from_kmz_bytes(content.encode("utf-8", errors="replace"))
+            if geometry is not None:
+                return geometry
 
         geometry = _extract_geometry_from_kml_text(content)
         if geometry is not None:
