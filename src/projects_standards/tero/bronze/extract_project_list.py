@@ -14,6 +14,7 @@
 
 import argparse
 import json
+import ssl
 import sys
 import time
 from datetime import UTC, datetime
@@ -91,6 +92,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Limita a quantidade de paginas para testes.",
     )
+    parser.add_argument(
+        "--insecure-ssl",
+        action="store_true",
+        help="Desativa verificacao de certificado TLS para ambientes sem cadeia CA configurada.",
+    )
     return parser.parse_args()
 
 
@@ -139,6 +145,7 @@ def fetch_json_response(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
     params: dict[str, Any] | None = None,
 ) -> tuple[Any, dict[str, str]]:
     if params:
@@ -153,7 +160,7 @@ def fetch_json_response(
     while True:
         req = request.Request(url=url, method="GET", headers={"Accept": "application/json"})
         try:
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout, context=ssl_context) as response:
                 body = json.loads(response.read().decode("utf-8"))
                 headers = {key: value for key, value in response.headers.items()}
                 return body, headers
@@ -180,12 +187,14 @@ def fetch_page(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
 ) -> tuple[list[dict[str, Any]], dict[str, str]]:
     body, headers = fetch_json_response(
         LIST_API_URL,
         timeout=timeout,
         retry_attempts=retry_attempts,
         retry_sleep_seconds=retry_sleep_seconds,
+        ssl_context=ssl_context,
         params={
             "page": page,
             "per_page": page_size,
@@ -207,6 +216,7 @@ def fetch_all_projects(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
     max_pages: int | None,
 ) -> dict[str, Any]:
     all_projects: list[dict[str, Any]] = []
@@ -225,6 +235,7 @@ def fetch_all_projects(
             timeout=timeout,
             retry_attempts=retry_attempts,
             retry_sleep_seconds=retry_sleep_seconds,
+            ssl_context=ssl_context,
         )
         if total_records is None:
             try:
@@ -287,6 +298,7 @@ def main() -> int:
         raise SystemExit("--retry-attempts nao pode ser negativo.")
 
     output_path, errors_path = build_paths(snapshot_date)
+    ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
 
     # Descompacta o snapshot da data solicitada se estiver zipado
     snapshot_dir = output_path.parent.parent
@@ -309,6 +321,7 @@ def main() -> int:
         f"{args.retry_sleep_seconds:.1f}s"
     )
     print(f"Timeout por requisicao: {args.timeout:.1f}s")
+    print(f"Modo SSL: {'insecure' if args.insecure_ssl else 'default'}")
     if args.max_pages is not None:
         print(f"Modo de teste ativado: max_pages={args.max_pages}")
     print(f"Arquivo de saida: {output_path}")
@@ -323,6 +336,7 @@ def main() -> int:
             timeout=args.timeout,
             retry_attempts=args.retry_attempts,
             retry_sleep_seconds=args.retry_sleep_seconds,
+            ssl_context=ssl_context,
             max_pages=args.max_pages,
         )
     except Exception as exc:

@@ -33,9 +33,9 @@ if str(_ROOT) not in sys.path:
 from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
 
 
-LIST_PAGE_URL = "https://wilder.earth/social_carbon"
-DETAIL_URL_TEMPLATE = "https://wilder.earth/project_details/{project_slug}"
-DETAIL_API_URL_TEMPLATE = "https://wilder.earth/api/1.1/obj/project/{project_internal_id}"
+LIST_PAGE_URL = "https://registry.socialcarbon.org"
+DETAIL_URL_TEMPLATE = "https://registry.socialcarbon.org/project/{project_internal_id}"
+DETAIL_API_URL_TEMPLATE = "https://registry.socialcarbon.org/api/1.1/obj/project/{project_internal_id}"
 DEFAULT_SLEEP_SECONDS = 0.5
 DEFAULT_BATCH_SIZE = 10
 DEFAULT_BATCH_SLEEP_SECONDS = 2.0
@@ -376,8 +376,7 @@ def process_projects(
                 print_progress_report(started_at=started_at, completed_items=completed_items, total_items=len(target_records))
             continue
 
-        project_slug = build_project_slug(project_public_id, project_internal_id)
-        project_url = DETAIL_URL_TEMPLATE.format(project_slug=project_slug)
+        project_url = DETAIL_URL_TEMPLATE.format(project_internal_id=project_internal_id)
 
         print(f"inicio download do projeto {project_public_id} ({index}/{len(target_records)})")
         try:

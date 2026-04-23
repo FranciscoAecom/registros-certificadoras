@@ -45,8 +45,9 @@
 
 ### Observacao de TLS
 
-- Neste ambiente, `requests` falhou com erro de cadeia de certificado autoassinada.
-- O acesso com `urllib` funcionou normalmente e foi mantido como base da integracao.
+- Em alguns ambientes Python, `acr2.apx.com` pode falhar com `CERTIFICATE_VERIFY_FAILED` quando a cadeia CA local estiver incompleta.
+- Os scripts aceitam `--insecure-ssl` para contornar esse problema operacional mantendo a coleta serial e conservadora.
+- O acesso com `urllib` foi mantido como base da integracao.
 - Se o ambiente do usuario mudar, revalidar primeiro o handshake TLS antes de trocar a biblioteca HTTP.
 
 ### Regras de Implementacao para esta Integracao

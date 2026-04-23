@@ -18,6 +18,7 @@
 import argparse
 import json
 import re
+import ssl
 import sys
 import time
 import traceback
@@ -90,6 +91,11 @@ def parse_args() -> argparse.Namespace:
         "--overwrite-existing",
         action="store_true",
         help="Sobrescreve arquivos de detalhe ja salvos para a mesma data.",
+    )
+    parser.add_argument(
+        "--insecure-ssl",
+        action="store_true",
+        help="Desativa verificacao de certificado TLS para ambientes sem cadeia CA configurada.",
     )
     return parser.parse_args()
 
@@ -240,6 +246,7 @@ def fetch_text(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
     params: dict[str, Any] | None = None,
     accept: str = "text/html",
 ) -> str:
@@ -255,7 +262,7 @@ def fetch_text(
     while True:
         req = request.Request(url=url, method="GET", headers={"Accept": accept})
         try:
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout, context=ssl_context) as response:
                 charset = response.headers.get_content_charset() or "utf-8"
                 return response.read().decode(charset, errors="replace")
         except error.HTTPError as exc:
@@ -280,6 +287,7 @@ def fetch_json(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
     params: dict[str, Any] | None = None,
 ) -> Any:
     body = fetch_text(
@@ -287,6 +295,7 @@ def fetch_json(
         timeout=timeout,
         retry_attempts=retry_attempts,
         retry_sleep_seconds=retry_sleep_seconds,
+        ssl_context=ssl_context,
         params=params,
         accept="application/json",
     )
@@ -300,12 +309,14 @@ def fetch_project_detail(
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
 ) -> dict[str, Any]:
     payload = fetch_json(
         DETAIL_API_URL_TEMPLATE.format(project_internal_id=project_internal_id),
         timeout=timeout,
         retry_attempts=retry_attempts,
         retry_sleep_seconds=retry_sleep_seconds,
+        ssl_context=ssl_context,
         params={"_embed": "1"},
     )
     if not isinstance(payload, dict):
@@ -343,6 +354,7 @@ def process_projects(
     retry_attempts: int,
     retry_sleep_seconds: float,
     timeout: float,
+    ssl_context: ssl.SSLContext,
     limit: int | None,
     overwrite_existing: bool,
 ) -> tuple[int, int, int]:
@@ -394,12 +406,14 @@ def process_projects(
                 timeout=timeout,
                 retry_attempts=retry_attempts,
                 retry_sleep_seconds=retry_sleep_seconds,
+                ssl_context=ssl_context,
             )
             detail_html = fetch_text(
                 project_url,
                 timeout=timeout,
                 retry_attempts=retry_attempts,
                 retry_sleep_seconds=retry_sleep_seconds,
+                ssl_context=ssl_context,
             )
 
             payload = {
@@ -468,6 +482,7 @@ def main() -> int:
         raise SystemExit("--retry-attempts nao pode ser negativo.")
 
     list_path, projects_dir, errors_path = build_paths(snapshot_date)
+    ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
 
     # Descompacta o snapshot se estiver zipado
     snapshot_dir = list_path.parent.parent
@@ -494,6 +509,7 @@ def main() -> int:
         f"{args.retry_sleep_seconds:.1f}s"
     )
     print(f"Timeout por operacao: {args.timeout:.1f}s")
+    print(f"Modo SSL: {'insecure' if args.insecure_ssl else 'default'}")
     print(
         "Persistencia existente: "
         + ("sobrescrever arquivos ja salvos" if args.overwrite_existing else "pular arquivos ja salvos")
@@ -512,6 +528,7 @@ def main() -> int:
         retry_attempts=args.retry_attempts,
         retry_sleep_seconds=args.retry_sleep_seconds,
         timeout=args.timeout,
+        ssl_context=ssl_context,
         limit=args.limit,
         overwrite_existing=args.overwrite_existing,
     )

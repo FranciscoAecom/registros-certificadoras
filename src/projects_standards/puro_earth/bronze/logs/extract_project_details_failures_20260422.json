@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "puro_earth",
+    "snapshot_date": "20260422",
+    "script": "extract_project_details.py"
+  },
+  "updated_at": "2026-04-22T18:01:20Z",
+  "failure_count": 0,
+  "failures": []
+}

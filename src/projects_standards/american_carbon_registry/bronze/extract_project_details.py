@@ -18,6 +18,7 @@
 import argparse
 import json
 import re
+import ssl
 import sys
 import time
 import traceback
@@ -93,6 +94,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS, help=f"Timeout por operacao em segundos. Padrao: {DEFAULT_TIMEOUT_SECONDS}.")
     parser.add_argument("--overwrite-existing", action="store_true", help="Sobrescreve arquivos de detalhe ja salvos para a mesma data.")
+    parser.add_argument(
+        "--insecure-ssl",
+        action="store_true",
+        help="Desabilita a verificacao do certificado SSL quando o ambiente local nao tiver a cadeia CA completa.",
+    )
     return parser.parse_args()
 
 
@@ -241,13 +247,21 @@ def build_headers(*, referer: str | None = None) -> dict[str, str]:
 
 
 # Busca um conteudo textual na fonte remota com as regras de resiliencia da integracao.
-def fetch_text(url: str, *, timeout: float, retry_attempts: int, retry_sleep_seconds: float, referer: str | None = None) -> str:
+def fetch_text(
+    url: str,
+    *,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+    referer: str | None = None,
+) -> str:
     attempts_total = retry_attempts + 1
     attempt = 1
     while True:
         req = request.Request(url=url, method="GET", headers=build_headers(referer=referer))
         try:
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout, context=ssl_context) as response:
                 body = response.read()
                 return decode_response_body(body, response.headers.get_content_charset())
         except error.HTTPError as exc:
@@ -318,6 +332,7 @@ def existing_output_is_valid(output_path: Path, project_public_id: str) -> bool:
 def main() -> int:
     args = parse_args()
     snapshot_date = validate_date(args.date)
+    ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
     if args.limit is not None and args.limit <= 0:
         raise SystemExit("--limit deve ser maior que zero.")
     if args.batch_size <= 0:
@@ -354,6 +369,7 @@ def main() -> int:
     print(f"Pausa a cada lote: {args.batch_sleep_seconds:.1f}s a cada {args.batch_size} projetos")
     print(f"Retry em 429: {args.retry_attempts} tentativas adicionais com espera de {args.retry_sleep_seconds:.1f}s")
     print(f"Timeout por operacao: {args.timeout:.1f}s")
+    print(f"Modo SSL: {'insecure' if args.insecure_ssl else 'default'}")
     print("Persistencia existente: " + ("sobrescrever arquivos ja salvos" if args.overwrite_existing else "pular arquivos ja salvos"))
     print(f"Total detectado na lista: {total_detected}")
     print(f"Total a processar nesta execucao: {total_to_process}")
@@ -379,8 +395,22 @@ def main() -> int:
         documents_url = DOCUMENTS_URL_TEMPLATE.format(project_internal_id=project_internal_id)
         print(f"inicio download do projeto {project_public_id} ({index}/{total_to_process})")
         try:
-            project_page_html = fetch_text(project_url, timeout=args.timeout, retry_attempts=args.retry_attempts, retry_sleep_seconds=args.retry_sleep_seconds, referer=LIST_PAGE_URL)
-            documents_page_html = fetch_text(documents_url, timeout=args.timeout, retry_attempts=args.retry_attempts, retry_sleep_seconds=args.retry_sleep_seconds, referer=project_url)
+            project_page_html = fetch_text(
+                project_url,
+                timeout=args.timeout,
+                retry_attempts=args.retry_attempts,
+                retry_sleep_seconds=args.retry_sleep_seconds,
+                ssl_context=ssl_context,
+                referer=LIST_PAGE_URL,
+            )
+            documents_page_html = fetch_text(
+                documents_url,
+                timeout=args.timeout,
+                retry_attempts=args.retry_attempts,
+                retry_sleep_seconds=args.retry_sleep_seconds,
+                ssl_context=ssl_context,
+                referer=project_url,
+            )
             payload = {
                 "source": build_project_source(
                     carbon_standard="american_carbon_registry",

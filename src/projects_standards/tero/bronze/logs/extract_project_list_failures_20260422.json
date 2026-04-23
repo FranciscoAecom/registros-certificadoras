@@ -1,0 +1,10 @@
+{
+  "source": {
+    "certificadora": "tero",
+    "snapshot_date": "20260422",
+    "script": "extract_project_list.py"
+  },
+  "updated_at": "2026-04-22T17:36:00Z",
+  "failure_count": 0,
+  "failures": []
+}

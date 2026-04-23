@@ -15,6 +15,7 @@
 import argparse
 import json
 import re
+import ssl
 import sys
 import time
 from datetime import UTC, datetime
@@ -77,6 +78,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--retry-sleep-seconds", type=float, default=DEFAULT_RETRY_SLEEP_SECONDS, help=f"Espera entre tentativas apos 429. Padrao: {DEFAULT_RETRY_SLEEP_SECONDS}.")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS, help=f"Timeout por requisicao em segundos. Padrao: {DEFAULT_TIMEOUT_SECONDS}.")
     parser.add_argument("--max-pages", type=int, default=None, help="Limita a quantidade de paginas para testes.")
+    parser.add_argument(
+        "--insecure-ssl",
+        action="store_true",
+        help="Desabilita a verificacao do certificado SSL quando o ambiente local nao tiver a cadeia CA completa.",
+    )
     return parser.parse_args()
 
 
@@ -129,7 +135,16 @@ def build_headers(*, referer: str | None = None, content_type: str | None = None
 
 
 # Busca um conteudo textual na fonte remota com as regras de resiliencia da integracao.
-def fetch_text(url: str, *, timeout: float, retry_attempts: int, retry_sleep_seconds: float, data: bytes | None = None, referer: str | None = None) -> str:
+def fetch_text(
+    url: str,
+    *,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+    data: bytes | None = None,
+    referer: str | None = None,
+) -> str:
     attempts_total = retry_attempts + 1
     attempt = 1
     while True:
@@ -140,7 +155,7 @@ def fetch_text(url: str, *, timeout: float, retry_attempts: int, retry_sleep_sec
             data=data,
         )
         try:
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout, context=ssl_context) as response:
                 body = response.read()
                 return decode_response_body(body, response.headers.get_content_charset())
         except error.HTTPError as exc:
@@ -207,9 +222,22 @@ def extract_rows(page_html: str) -> tuple[list[str], list[dict[str, Any]]]:
 
 
 # Busca o HTML de uma pagina de lista ou detalhe.
-def fetch_page_html(page_number: int, *, timeout: float, retry_attempts: int, retry_sleep_seconds: float) -> str:
+def fetch_page_html(
+    page_number: int,
+    *,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+) -> str:
     if page_number == 1:
-        return fetch_text(LIST_PAGE_URL, timeout=timeout, retry_attempts=retry_attempts, retry_sleep_seconds=retry_sleep_seconds)
+        return fetch_text(
+            LIST_PAGE_URL,
+            timeout=timeout,
+            retry_attempts=retry_attempts,
+            retry_sleep_seconds=retry_sleep_seconds,
+            ssl_context=ssl_context,
+        )
     body = parse.urlencode(
         {
             "X999myquery": "",
@@ -223,11 +251,29 @@ def fetch_page_html(page_number: int, *, timeout: float, retry_attempts: int, re
             "X999whichpage": str(page_number),
         }
     ).encode("utf-8")
-    return fetch_text(LIST_PAGE_URL, timeout=timeout, retry_attempts=retry_attempts, retry_sleep_seconds=retry_sleep_seconds, data=body, referer=LIST_PAGE_URL)
+    return fetch_text(
+        LIST_PAGE_URL,
+        timeout=timeout,
+        retry_attempts=retry_attempts,
+        retry_sleep_seconds=retry_sleep_seconds,
+        ssl_context=ssl_context,
+        data=body,
+        referer=LIST_PAGE_URL,
+    )
 
 
 # Percorre a fonte paginada e acumula todos os projetos da lista.
-def fetch_all_projects(*, sleep_seconds: float, batch_size: int, batch_sleep_seconds: float, timeout: float, retry_attempts: int, retry_sleep_seconds: float, max_pages: int | None) -> dict[str, Any]:
+def fetch_all_projects(
+    *,
+    sleep_seconds: float,
+    batch_size: int,
+    batch_sleep_seconds: float,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+    max_pages: int | None,
+) -> dict[str, Any]:
     all_projects: list[dict[str, Any]] = []
     page_headers: list[str] | None = None
     total_pages: int | None = None
@@ -237,7 +283,13 @@ def fetch_all_projects(*, sleep_seconds: float, batch_size: int, batch_sleep_sec
         if max_pages is not None and page_number > max_pages:
             break
         print(f"Iniciando consulta da pagina {page_number}")
-        page_html = fetch_page_html(page_number, timeout=timeout, retry_attempts=retry_attempts, retry_sleep_seconds=retry_sleep_seconds)
+        page_html = fetch_page_html(
+            page_number,
+            timeout=timeout,
+            retry_attempts=retry_attempts,
+            retry_sleep_seconds=retry_sleep_seconds,
+            ssl_context=ssl_context,
+        )
         current_total_pages = extract_total_pages(page_html)
         if total_pages is None:
             total_pages = current_total_pages
@@ -278,6 +330,7 @@ def fetch_all_projects(*, sleep_seconds: float, batch_size: int, batch_sleep_sec
 def main() -> int:
     args = parse_args()
     snapshot_date = validate_date(args.date)
+    ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
     if args.batch_size <= 0:
         raise SystemExit("--batch-size deve ser maior que zero.")
     if args.retry_attempts < 0:
@@ -301,6 +354,7 @@ def main() -> int:
     print(f"Pausa a cada lote: {args.batch_sleep_seconds:.1f}s a cada {args.batch_size} paginas")
     print(f"Retry em 429: {args.retry_attempts} tentativas adicionais com espera de {args.retry_sleep_seconds:.1f}s")
     print(f"Timeout por requisicao: {args.timeout:.1f}s")
+    print(f"Modo SSL: {'insecure' if args.insecure_ssl else 'default'}")
     if args.max_pages is not None:
         print(f"Modo de teste ativado: max_pages={args.max_pages}")
     print(f"Arquivo de saida: {output_path}")
@@ -314,6 +368,7 @@ def main() -> int:
             timeout=args.timeout,
             retry_attempts=args.retry_attempts,
             retry_sleep_seconds=args.retry_sleep_seconds,
+            ssl_context=ssl_context,
             max_pages=args.max_pages,
         )
     except Exception as exc:

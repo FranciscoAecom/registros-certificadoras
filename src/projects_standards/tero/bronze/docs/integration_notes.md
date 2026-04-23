@@ -31,6 +31,7 @@
 ### Comportamento Observado do Frontend
 
 - O site da TERO e um WordPress com tema Divi.
+- Em alguns ambientes Python, `terocarbon.com` pode falhar com `CERTIFICATE_VERIFY_FAILED`; os scripts aceitam `--insecure-ssl` para contornar esse problema operacional quando a cadeia CA local nao estiver completa.
 - A pagina publica de projetos mostra atualmente os mesmos `3` projetos retornados pelo endpoint REST do custom post type `project`.
 - O endpoint REST exposto para `project` e publico e paginado por `page` e `per_page`.
 - O detalhe REST retorna o conteudo do WordPress, mas o campo `content.rendered` preserva shortcodes do Divi em vez do HTML final da pagina.

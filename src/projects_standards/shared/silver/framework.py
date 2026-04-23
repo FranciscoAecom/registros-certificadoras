@@ -71,16 +71,19 @@ GEOMETRY_CANDIDATE_PATHS = (
     "list_data.project.geometry",
 )
 LATITUDE_CANDIDATE_PATHS = (
+    "detail_data.Latitude",
     "detail_data.location.latitude",
     "detail_data.location.lat",
     "detail_data.latitude",
     "detail_data.lat",
     "detail_data.project.latitude",
     "detail_data.project.lat",
+    "list_data.Latitude",
     "list_data.latitude",
     "list_data.lat",
 )
 LONGITUDE_CANDIDATE_PATHS = (
+    "detail_data.Longitude",
     "detail_data.location.longitude",
     "detail_data.location.lng",
     "detail_data.location.lon",
@@ -90,6 +93,7 @@ LONGITUDE_CANDIDATE_PATHS = (
     "detail_data.project.longitude",
     "detail_data.project.lng",
     "detail_data.project.lon",
+    "list_data.Longitude",
     "list_data.longitude",
     "list_data.lng",
     "list_data.lon",
