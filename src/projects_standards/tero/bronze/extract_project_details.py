@@ -16,6 +16,7 @@
 
 
 import argparse
+import base64
 import json
 import re
 import ssl
@@ -23,6 +24,7 @@ import sys
 import time
 import traceback
 from datetime import UTC, datetime
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib import error, parse, request
@@ -44,6 +46,38 @@ DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_RETRY_ATTEMPTS = 3
 DEFAULT_RETRY_SLEEP_SECONDS = 5.0
 DEFAULT_PROGRESS_REPORT_EVERY = 10
+
+
+# Extrai links do HTML publico preservando href e texto associado.
+class LinkExtractor(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[dict[str, str]] = []
+        self._current_href: str | None = None
+        self._current_text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() != "a":
+            return
+        attrs_dict = dict(attrs)
+        href = (attrs_dict.get("href") or "").strip()
+        if not href:
+            return
+        self._current_href = href
+        self._current_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._current_href is None:
+            return
+        self._current_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() != "a" or self._current_href is None:
+            return
+        text = " ".join(part.strip() for part in self._current_text if part.strip()).strip()
+        self.links.append({"href": self._current_href, "text": text})
+        self._current_href = None
+        self._current_text = []
 
 
 # Define e retorna os argumentos de linha de comando do script.
@@ -280,6 +314,39 @@ def fetch_text(
             raise RuntimeError(f"Falha de rede ao consultar {url}: {exc}") from exc
 
 
+# Busca um conteudo binario remoto com as regras de resiliencia da integracao.
+def fetch_bytes(
+    url: str,
+    *,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+    accept: str = "*/*",
+) -> tuple[bytes, str]:
+    attempts_total = retry_attempts + 1
+    attempt = 1
+    while True:
+        req = request.Request(url=url, method="GET", headers={"Accept": accept})
+        try:
+            with request.urlopen(req, timeout=timeout, context=ssl_context) as response:
+                content_type = response.headers.get("Content-Type") or ""
+                return response.read(), content_type
+        except error.HTTPError as exc:
+            if exc.code == 429 and attempt < attempts_total:
+                print(
+                    f"429 Too Many Requests para {url}; aguardando {retry_sleep_seconds:.1f}s "
+                    f"antes da tentativa {attempt + 1}/{attempts_total}"
+                )
+                time.sleep(retry_sleep_seconds)
+                attempt += 1
+                continue
+            details = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"Erro HTTP {exc.code} ao baixar {url}. Resposta: {details}") from exc
+        except error.URLError as exc:
+            raise RuntimeError(f"Falha de rede ao baixar {url}: {exc}") from exc
+
+
 # Busca um payload JSON na fonte remota com as regras de resiliencia da integracao.
 def fetch_json(
     url: str,
@@ -324,6 +391,137 @@ def fetch_project_detail(
     return payload
 
 
+# Extrai todos os links publicos observados no HTML da pagina do projeto.
+def extract_page_links(detail_html: str) -> list[dict[str, str]]:
+    parser = LinkExtractor()
+    parser.feed(detail_html)
+    unique_links: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for item in parser.links:
+        href = item["href"].strip()
+        text = item["text"].strip()
+        key = (href, text)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_links.append({"href": href, "text": text})
+    return unique_links
+
+
+# Detecta links espaciais observados na pagina publica da TERO.
+def collect_spatial_links(page_links: list[dict[str, str]]) -> list[dict[str, str]]:
+    results: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for link in page_links:
+        href = link.get("href", "").strip()
+        text = link.get("text", "").strip()
+        lower_href = href.lower()
+        lower_text = text.lower()
+        if "google.com/maps/d/" in lower_href:
+            item = {
+                "sourceType": "google_my_maps",
+                "sourceUrl": href,
+                "label": text or "Mapa com a localizacao do projeto",
+            }
+            key = (item["sourceType"], item["sourceUrl"])
+            if key not in seen:
+                seen.add(key)
+                results.append(item)
+            continue
+        if any(token in lower_href for token in (".kml", ".kmz", ".geojson", ".shp", ".zip")):
+            item = {
+                "sourceType": "direct_spatial_link",
+                "sourceUrl": href,
+                "label": text or Path(parse.urlparse(href).path).name,
+            }
+            key = (item["sourceType"], item["sourceUrl"])
+            if key not in seen:
+                seen.add(key)
+                results.append(item)
+            continue
+        if any(token in lower_text for token in ("mapa", "cartografia", "shape", "kml", "kmz", "geojson")):
+            item = {
+                "sourceType": "suspected_spatial_link",
+                "sourceUrl": href,
+                "label": text,
+            }
+            key = (item["sourceType"], item["sourceUrl"])
+            if key not in seen:
+                seen.add(key)
+                results.append(item)
+    return results
+
+
+# Resolve o alvo de download espacial final a partir do link publico identificado.
+def resolve_spatial_download_target(link: dict[str, str]) -> dict[str, str] | None:
+    source_type = link.get("sourceType", "")
+    source_url = link.get("sourceUrl", "")
+    if source_type == "google_my_maps":
+        parsed = parse.urlparse(source_url)
+        query = parse.parse_qs(parsed.query)
+        mid = (query.get("mid") or [None])[0]
+        if not mid:
+            return None
+        return {
+            "downloadUrl": f"https://www.google.com/maps/d/kml?mid={mid}&forcekml=1",
+            "filename": f"{sanitize_filename(link.get('label') or 'project_map')}.kml",
+            "contentType": "application/vnd.google-earth.kml+xml",
+        }
+
+    source_path = parse.urlparse(source_url).path
+    source_name = Path(source_path).name or "spatial_document"
+    extension = Path(source_name).suffix.lower()
+    if extension in {".kml", ".kmz", ".geojson", ".zip", ".shp"}:
+        return {
+            "downloadUrl": source_url,
+            "filename": sanitize_filename(source_name),
+            "contentType": "",
+        }
+    return None
+
+
+# Baixa e anexa documentos espaciais identificados no HTML publico da TERO.
+def enrich_spatial_documents(
+    *,
+    detail_html: str,
+    timeout: float,
+    retry_attempts: int,
+    retry_sleep_seconds: float,
+    ssl_context: ssl.SSLContext,
+) -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
+    page_links = extract_page_links(detail_html)
+    spatial_links = collect_spatial_links(page_links)
+    if not spatial_links:
+        return page_links, []
+
+    enriched_documents: list[dict[str, Any]] = []
+    for link in spatial_links:
+        enriched = dict(link)
+        target = resolve_spatial_download_target(link)
+        if target is None:
+            enriched["downloadError"] = "Nao foi possivel resolver um alvo de download espacial."
+            enriched_documents.append(enriched)
+            continue
+        try:
+            raw_bytes, response_content_type = fetch_bytes(
+                target["downloadUrl"],
+                timeout=timeout,
+                retry_attempts=retry_attempts,
+                retry_sleep_seconds=retry_sleep_seconds,
+                ssl_context=ssl_context,
+            )
+            enriched["downloadUrl"] = target["downloadUrl"]
+            enriched["name"] = target["filename"]
+            enriched["contentType"] = target["contentType"] or response_content_type
+            enriched["contentEncoding"] = "base64"
+            enriched["content"] = base64.b64encode(raw_bytes).decode("ascii")
+        except Exception as exc:  # noqa: BLE001
+            enriched["downloadError"] = str(exc)
+        enriched_documents.append(enriched)
+
+    return page_links, enriched_documents
+
+
 # Verifica se o arquivo de saida existente ja pode ser reaproveitado.
 def existing_output_is_valid(output_path: Path, project_public_id: str) -> bool:
     if not output_path.exists():
@@ -337,6 +535,10 @@ def existing_output_is_valid(output_path: Path, project_public_id: str) -> bool:
     source = payload.get("source")
     detail_data = payload.get("detail_data")
     if not isinstance(source, dict) or not isinstance(detail_data, dict):
+        return False
+    page_html = detail_data.get("page_html")
+    spatial_documents = detail_data.get("spatial_documents")
+    if isinstance(page_html, str) and "google.com/maps/d/" in page_html and not spatial_documents:
         return False
     return source.get("project_public_id") == project_public_id
 
@@ -415,6 +617,13 @@ def process_projects(
                 retry_sleep_seconds=retry_sleep_seconds,
                 ssl_context=ssl_context,
             )
+            page_links, spatial_documents = enrich_spatial_documents(
+                detail_html=detail_html,
+                timeout=timeout,
+                retry_attempts=retry_attempts,
+                retry_sleep_seconds=retry_sleep_seconds,
+                ssl_context=ssl_context,
+            )
 
             payload = {
                 "source": build_project_source(
@@ -433,6 +642,8 @@ def process_projects(
                 "detail_data": {
                     "api_response": detail_json,
                     "page_html": detail_html,
+                    "page_links": page_links,
+                    "spatial_documents": spatial_documents,
                 },
             }
             output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

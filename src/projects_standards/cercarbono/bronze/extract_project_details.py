@@ -16,6 +16,7 @@
 
 
 import argparse
+import base64
 import json
 import re
 import sys
@@ -37,6 +38,8 @@ from src.projects_standards.shared.archive_data import pack_directory, unpack_ar
 
 PAGE_URL_TEMPLATE = "https://www.ecoregistry.io/projects/{project_internal_id}"
 API_URL_TEMPLATE = "https://api-front.ecoregistry.io/platform/project/public/{project_internal_id}"
+PROJECT_DOCUMENTS_URL_TEMPLATE = "https://api-front.ecoregistry.io/platform/projectDocument/get-by-project-id/{project_internal_id}/{verification_number}"
+PROJECT_LOCATION_DOCUMENT_DOWNLOAD_URL_TEMPLATE = "https://api-front.ecoregistry.io/platform/projectLocationsDocuments/download/{document_id}"
 DEFAULT_SLEEP_SECONDS = 0.5
 DEFAULT_BATCH_SIZE = 10
 DEFAULT_BATCH_SLEEP_SECONDS = 2.0
@@ -248,6 +251,25 @@ def build_headers(project_internal_id: str) -> dict[str, str]:
     }
 
 
+# Busca um JSON remoto e valida o formato basico esperado.
+def fetch_json(url: str, headers: dict[str, str], timeout: float) -> dict[str, Any]:
+    req = request.Request(url=url, method="GET", headers=headers)
+
+    try:
+        with request.urlopen(req, timeout=timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Erro HTTP {exc.code} ao consultar {url}. Resposta: {details}") from exc
+    except error.URLError as exc:
+        raise RuntimeError(f"Falha de rede ao consultar {url}: {exc}") from exc
+
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Resposta inesperada para {url}: era esperado um objeto JSON.")
+
+    return payload
+
+
 # Carrega os projetos salvos no snapshot bruto da lista.
 def load_projects(list_path: Path) -> list[dict[str, Any]]:
     if not list_path.exists():
@@ -278,31 +300,157 @@ def load_projects(list_path: Path) -> list[dict[str, Any]]:
 # Busca o detalhe bruto de um projeto na fonte remota.
 def fetch_project_details(project_internal_id: str, timeout: float) -> dict[str, Any]:
     # Reutilizamos o endpoint JSON publico do frontend da pagina de detalhe.
-    req = request.Request(
+    return fetch_json(
         url=API_URL_TEMPLATE.format(project_internal_id=project_internal_id),
-        method="GET",
         headers=build_headers(project_internal_id),
+        timeout=timeout,
     )
 
+
+# Lista os grupos de documentos disponiveis para a verificacao publica ativa.
+def fetch_project_documents(
+    project_internal_id: str,
+    verification_number: int,
+    timeout: float,
+) -> list[dict[str, Any]]:
+    payload = fetch_json(
+        url=PROJECT_DOCUMENTS_URL_TEMPLATE.format(
+            project_internal_id=project_internal_id,
+            verification_number=verification_number,
+        ),
+        headers=build_headers(project_internal_id),
+        timeout=timeout,
+    )
+    documents = payload.get("documents")
+    if not isinstance(documents, list):
+        return []
+    return [group for group in documents if isinstance(group, dict)]
+
+
+# Filtra documentos cartograficos do payload de documentos do projeto.
+def collect_spatial_documents(document_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for group in document_groups:
+        group_name = str(group.get("name") or "").strip()
+        documents = group.get("documents")
+        if not isinstance(documents, list):
+            continue
+
+        for document in documents:
+            if not isinstance(document, dict):
+                continue
+            document_type = str(document.get("type") or "").strip()
+            document_name = str(document.get("name") or "").strip()
+            if document_type != "documentLocation" and group_name.lower() != "cartography":
+                continue
+            results.append(
+                {
+                    "groupName": group_name,
+                    "id": document.get("id"),
+                    "name": document_name,
+                    "type": document_type,
+                    "created": document.get("created"),
+                    "updated": document.get("updated"),
+                    "last": document.get("last"),
+                    "hash": document.get("hash"),
+                }
+            )
+    return results
+
+
+# Resolve a URL publica temporaria do ZIP cartografico para um documento espacial.
+def fetch_spatial_document_download_info(
+    project_internal_id: str,
+    document_id: str,
+    timeout: float,
+) -> dict[str, Any]:
+    payload = fetch_json(
+        url=PROJECT_LOCATION_DOCUMENT_DOWNLOAD_URL_TEMPLATE.format(document_id=document_id),
+        headers=build_headers(project_internal_id),
+        timeout=timeout,
+    )
+    if "url" not in payload:
+        raise RuntimeError(
+            f"Resposta sem URL de download para o documento espacial {document_id} do projeto {project_internal_id}."
+        )
+    return payload
+
+
+# Baixa o binario bruto de um documento remoto.
+def fetch_document_bytes(url: str, timeout: float) -> bytes:
+    req = request.Request(
+        url=url,
+        method="GET",
+        headers={
+            "Accept": "*/*",
+            "User-Agent": USER_AGENT,
+        },
+    )
     try:
         with request.urlopen(req, timeout=timeout) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+            return response.read()
     except error.HTTPError as exc:
         details = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(
-            f"Erro HTTP {exc.code} ao consultar o projeto {project_internal_id}. Resposta: {details}"
-        ) from exc
+        raise RuntimeError(f"Erro HTTP {exc.code} ao baixar {url}. Resposta: {details}") from exc
     except error.URLError as exc:
-        raise RuntimeError(
-            f"Falha de rede ao consultar o projeto {project_internal_id}: {exc}"
-        ) from exc
+        raise RuntimeError(f"Falha de rede ao baixar {url}: {exc}") from exc
 
-    if not isinstance(payload, dict):
-        raise RuntimeError(
-            f"Resposta inesperada para o projeto {project_internal_id}: era esperado um objeto JSON."
-        )
 
-    return payload
+# Baixa e preserva anexos cartograficos ZIP do projeto dentro do payload bronze.
+def enrich_spatial_documents(
+    detail_payload: dict[str, Any],
+    *,
+    project_internal_id: str,
+    timeout: float,
+) -> None:
+    project_data = detail_payload.get("project")
+    if not isinstance(project_data, dict):
+        return
+
+    verification_number = project_data.get("verificationNumber")
+    if not isinstance(verification_number, int):
+        return
+
+    document_groups = fetch_project_documents(
+        project_internal_id=project_internal_id,
+        verification_number=verification_number,
+        timeout=timeout,
+    )
+    spatial_documents = collect_spatial_documents(document_groups)
+    if not spatial_documents:
+        return
+
+    enriched_documents: list[dict[str, Any]] = []
+    for spatial_document in spatial_documents:
+        enriched = dict(spatial_document)
+        document_id = spatial_document.get("id")
+        if document_id is None:
+            enriched["downloadError"] = "Documento cartografico sem id."
+            enriched_documents.append(enriched)
+            continue
+
+        try:
+            download_info = fetch_spatial_document_download_info(
+                project_internal_id=project_internal_id,
+                document_id=str(document_id),
+                timeout=timeout,
+            )
+            download_url = str(download_info.get("url") or "").strip()
+            enriched["downloadInfo"] = download_info
+            if not download_url:
+                raise RuntimeError("Resposta de download sem campo url.")
+
+            raw_bytes = fetch_document_bytes(download_url, timeout)
+            enriched["contentEncoding"] = "base64"
+            enriched["contentType"] = "application/zip"
+            enriched["content"] = base64.b64encode(raw_bytes).decode("ascii")
+        except Exception as exc:  # noqa: BLE001
+            enriched["downloadError"] = str(exc)
+
+        enriched_documents.append(enriched)
+
+    if enriched_documents:
+        detail_payload["spatial_documents"] = enriched_documents
 
 
 # Salva o detalhe bruto do projeto no diretorio de destino.
@@ -371,6 +519,11 @@ def main() -> int:
 
             try:
                 detail_payload = fetch_project_details(
+                    project_internal_id=project_internal_id,
+                    timeout=args.timeout,
+                )
+                enrich_spatial_documents(
+                    detail_payload=detail_payload,
                     project_internal_id=project_internal_id,
                     timeout=args.timeout,
                 )

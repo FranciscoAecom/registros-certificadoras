@@ -38,6 +38,11 @@
 - Para nao perder o bruto efetivamente exibido ao usuario, `extract_project_details.py` salva:
   - a resposta JSON do WordPress REST
   - o HTML publico da pagina do projeto
+- A pagina publica tambem pode expor anexos e referencias espaciais diretamente no HTML.
+- No projeto `Aruana I`, foi observado:
+  - iframe e link publico de Google My Maps em `https://www.google.com/maps/d/...`
+  - exportacao direta de KML via `https://www.google.com/maps/d/kml?mid=<MID>&forcekml=1`
+  - documento `Relatorio de Geoprocessamento (PT)` em PDF na tabela publica de links.
 
 ### Decisao Atual
 
@@ -46,6 +51,8 @@
 - `extract_project_details.py` usa:
   - `GET /wp-json/wp/v2/project/<id>?_embed=1`
   - `GET https://terocarbon.com/project/<slug>/`
+- O script tambem extrai links da pagina publica em `detail_data.page_links`.
+- Quando houver Google My Maps ou anexos espaciais diretos, o script baixa e preserva esses artefatos em `detail_data.spatial_documents`.
 - O vinculo entre lista e detalhe usa:
   - `slug` como `project_public_id`
   - `id` como `project_internal_id`
@@ -66,3 +73,4 @@
   - quantidade publica de projetos
   - shape do campo `content.rendered`
   - regra de montagem da URL publica por `slug`
+  - estrutura da tabela publica de links e padrao dos links espaciais

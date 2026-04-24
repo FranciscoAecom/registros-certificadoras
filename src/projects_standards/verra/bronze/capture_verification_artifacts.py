@@ -18,7 +18,7 @@ import urllib.request
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[4]
 BASE_DIR = (
     ROOT
     / "data"
@@ -221,83 +221,100 @@ def take_screenshot(url: str, destination: Path):
         f"--screenshot={destination}",
         url,
     ]
-    result = subprocess.run(command, capture_output=True, text=True, timeout=240)
-    if result.returncode != 0:
-        raise RuntimeError((result.stderr or result.stdout or "Erro no screenshot").strip())
+    subprocess.run(command, check=True, timeout=TIMEOUT)
 
 
-# Persiste o log incremental para retomadas e auditoria.
-def write_log(payload: dict) -> None:
-    LOG_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+# Carrega o log incremental ja salvo para permitir retomada segura.
+def load_log() -> dict:
+    if not LOG_PATH.exists():
+        return {"projects": {}}
+    return json.loads(LOG_PATH.read_text(encoding="utf-8"))
 
 
-with CSV_PATH.open("r", encoding="utf-8-sig", newline="") as handle:
-    rows = list(csv.DictReader(handle, delimiter=";"))
+# Salva o log incremental de captura em disco.
+def save_log(log_data: dict):
+    LOG_PATH.write_text(json.dumps(log_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
-existing_log = {"projects": []}
-if LOG_PATH.exists():
-    try:
-        existing_log = json.loads(LOG_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        existing_log = {"projects": []}
 
-processed_ids = {
-    str(item.get("project_public_id"))
-    for item in existing_log.get("projects", [])
-    if item.get("status") == "ok"
-}
-log = {
-    "source_csv": str(CSV_PATH),
-    "base_dir": str(BASE_DIR),
-    "total_projects": len(rows),
-    "processed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-    "projects": [item for item in existing_log.get("projects", []) if item.get("project_public_id")],
-}
+# Retorna o identificador de projeto lido do CSV.
+def extract_project_id(row: dict) -> str | None:
+    for key in ("project_id", "project_public_id", "resourceIdentifier", "id"):
+        value = (row.get(key) or "").strip()
+        if value:
+            return value
+    return None
 
-for index, row in enumerate(rows, start=1):
-    project_id = (row.get("project_public_id") or "").strip()
-    project_url = (row.get("project_url") or "").strip()
-    if not project_id or not project_url or project_id in processed_ids:
-        continue
 
-    project_dir = BASE_DIR / project_id
-    project_dir.mkdir(parents=True, exist_ok=True)
-    screenshot_path = project_dir / "page.png"
-    project_log = {
-        "row_index": index,
-        "project_public_id": project_id,
+# Monta a URL publica do projeto da Verra.
+def build_project_url(project_id: str) -> str:
+    return f"https://registry.verra.org/app/projectDetail/VCS/{project_id}"
+
+
+# Executa a captura completa de um projeto e retorna o resumo para o log.
+def process_project(project_id: str, destination_dir: Path):
+    project_url = build_project_url(project_id)
+    screenshot_path = destination_dir / "page.png"
+    take_screenshot(project_url, screenshot_path)
+
+    detail_url = DETAIL_ENDPOINT.format(project_id=project_id)
+    payload = request_json(detail_url)
+    documents = collect_documents(payload)
+
+    downloaded = []
+    for index, document in enumerate(documents, start=1):
+        downloaded.append(download_file(document, destination_dir, index))
+        if index < len(documents):
+            time.sleep(DOC_SLEEP)
+
+    return {
+        "project_id": project_id,
         "project_url": project_url,
-        "project_dir": str(project_dir),
-        "documents": [],
+        "screenshot": str(screenshot_path),
+        "document_count": len(downloaded),
+        "documents": downloaded,
     }
 
-    try:
-        take_screenshot(project_url, screenshot_path)
-        project_log["screenshot"] = str(screenshot_path)
-    except Exception as exc:
-        project_log["screenshot_error"] = str(exc)
 
-    try:
-        payload = request_json(DETAIL_ENDPOINT.format(project_id=urllib.parse.quote(project_id)))
-        documents = collect_documents(payload)
-        project_log["document_count_detected"] = len(documents)
-        for doc_index, document in enumerate(documents, start=1):
-            file_meta = download_file(document, project_dir, doc_index)
-            file_meta["group"] = document.get("group")
-            file_meta["documentType"] = document.get("documentType")
-            project_log["documents"].append(file_meta)
-            time.sleep(DOC_SLEEP)
-        project_log["status"] = "ok"
-    except Exception as exc:
-        project_log["status"] = "error"
-        project_log["error"] = str(exc)
+# Fluxo principal de leitura do CSV, retomada e captura incremental.
+def main():
+    with CSV_PATH.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
 
-    log["projects"].append(project_log)
-    print(f"[{index}/{len(rows)}] projeto {project_id}: {project_log.get('status', 'ok')} | docs={len(project_log['documents'])}")
-    write_log(log)
-    time.sleep(PROJECT_SLEEP)
-    if index % BATCH_SIZE == 0 and index < len(rows):
-        time.sleep(BATCH_SLEEP)
+    log_data = load_log()
+    project_log = log_data.setdefault("projects", {})
+    completed = 0
 
-write_log(log)
-print(f"Concluido. Log salvo em {LOG_PATH}")
+    for row in rows:
+        project_id = extract_project_id(row)
+        if not project_id:
+            continue
+        if project_log.get(project_id, {}).get("status") == "done":
+            continue
+
+        destination_dir = BASE_DIR / project_id
+        destination_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            result = process_project(project_id, destination_dir)
+            project_log[project_id] = {
+                "status": "done",
+                "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "result": result,
+            }
+        except Exception as exc:  # noqa: BLE001
+            project_log[project_id] = {
+                "status": "error",
+                "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "error": str(exc),
+            }
+        save_log(log_data)
+        completed += 1
+
+        if completed % BATCH_SIZE == 0:
+            time.sleep(BATCH_SLEEP)
+        else:
+            time.sleep(PROJECT_SLEEP)
+
+
+if __name__ == "__main__":
+    main()

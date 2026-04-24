@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>BioMA Carbono - Centroides</name>
+    <description>Gerado a partir das p?ginas 11 a 53 do PDF SC11_MR_BioMA_v5_25022026_final.pdf.</description>
+    <Style id="centroid-point">
+      <IconStyle>
+        <scale>1.1</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+        </Icon>
+      </IconStyle>
+    </Style>
+    <Folder>
+      <name>Im?veis</name>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Peroba</name>
+        <description><![CDATA[<b>ID:</b> 1<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Guaratinguetá<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 7.44<br/><b>Centr?ide original:</b> 22?59'46.1" S / 45?13'03.9" W]]></description>
+        <Point>
+          <coordinates>-45.21775000,-22.99613889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Recanto do Cururu</name>
+        <description><![CDATA[<b>ID:</b> 2<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 23.34<br/><b>Centr?ide original:</b> 23?01'34.69" S / 45?15'52.17" W]]></description>
+        <Point>
+          <coordinates>-45.26449167,-23.02630278,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Serrinha 1</name>
+        <description><![CDATA[<b>ID:</b> 3<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Itaocá<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 76.25<br/><b>Centr?ide original:</b> 24?35'52" S / 48?55'17.91" W]]></description>
+        <Point>
+          <coordinates>-48.92164167,-24.59777778,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Serrinha 2</name>
+        <description><![CDATA[<b>ID:</b> 4<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Itaocá<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 67.63<br/><b>Centr?ide original:</b> 24?35'34.79" S / 48?54'54.01" W]]></description>
+        <Point>
+          <coordinates>-48.91500278,-24.59299722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Serrinha 3</name>
+        <description><![CDATA[<b>ID:</b> 5<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Itaocá<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 63.18<br/><b>Centr?ide original:</b> 24?35'25.31" S / 48?55'16.51" W]]></description>
+        <Point>
+          <coordinates>-48.92125278,-24.59036389,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Ateliê 26</name>
+        <description><![CDATA[<b>ID:</b> 6<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 4.85<br/><b>Centr?ide original:</b> 23?04'15.81" S / 45?10'40.4" W]]></description>
+        <Point>
+          <coordinates>-45.17788889,-23.07105833,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Caminho do Meio</name>
+        <description><![CDATA[<b>ID:</b> 7<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.92<br/><b>Centr?ide original:</b> 23?06'02.17" S / 45?15'06.89" W]]></description>
+        <Point>
+          <coordinates>-45.25191389,-23.10060278,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Bela Vista</name>
+        <description><![CDATA[<b>ID:</b> 8<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Colatina<br/><b>UF:</b> ES<br/><b>?rea eleg?vel (ha):</b> 17.83<br/><b>Centr?ide original:</b> 19?31'18.21" S / 40?49'07.65" W]]></description>
+        <Point>
+          <coordinates>-40.81879167,-19.52172500,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Córrego Boa Vista</name>
+        <description><![CDATA[<b>ID:</b> 9<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Colatina<br/><b>UF:</b> ES<br/><b>?rea eleg?vel (ha):</b> 8.70<br/><b>Centr?ide original:</b> 19?31'19.19" S / 40?48'14.37" W]]></description>
+        <Point>
+          <coordinates>-40.80399167,-19.52199722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Boa Vista</name>
+        <description><![CDATA[<b>ID:</b> 10<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Colatina<br/><b>UF:</b> ES<br/><b>?rea eleg?vel (ha):</b> 8.95<br/><b>Centr?ide original:</b> 19?30'50.47" S / 40?47'55.72" W]]></description>
+        <Point>
+          <coordinates>-40.79881111,-19.51401944,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Pedra Rachada</name>
+        <description><![CDATA[<b>ID:</b> 11<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Colatina<br/><b>UF:</b> ES<br/><b>?rea eleg?vel (ha):</b> 1.19<br/><b>Centr?ide original:</b> 19?30'46.76" S / 40?47'12.77" W]]></description>
+        <Point>
+          <coordinates>-40.78688056,-19.51298889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Jequitibá</name>
+        <description><![CDATA[<b>ID:</b> 12<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> Colatina<br/><b>UF:</b> ES<br/><b>?rea eleg?vel (ha):</b> 45.66<br/><b>Centr?ide original:</b> 19?31'08.82" S / 40?48'40.37" W]]></description>
+        <Point>
+          <coordinates>-40.81121389,-19.51911667,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Oliveira Segundo</name>
+        <description><![CDATA[<b>ID:</b> 13<br/><b>Data de ades?o:</b> 02/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.46<br/><b>Centr?ide original:</b> 23?01'54.45" S / 45?15'15.47" W]]></description>
+        <Point>
+          <coordinates>-45.25429722,-23.03179167,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Boa Vista 1</name>
+        <description><![CDATA[<b>ID:</b> 14<br/><b>Data de ades?o:</b> 02/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 19.16<br/><b>Centr?ide original:</b> 23?16'28.73" S / 45?22'20.35" W]]></description>
+        <Point>
+          <coordinates>-45.37231944,-23.27464722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Boa Vista 2</name>
+        <description><![CDATA[<b>ID:</b> 15<br/><b>Data de ades?o:</b> 02/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 16.82<br/><b>Centr?ide original:</b> 23?16'46.31" S / 45?21'44.38" W]]></description>
+        <Point>
+          <coordinates>-45.36232778,-23.27953056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Europa</name>
+        <description><![CDATA[<b>ID:</b> 16<br/><b>Data de ades?o:</b> 01/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 3.81<br/><b>Centr?ide original:</b> 23?19'08.08" S / 45?09'08.65" W]]></description>
+        <Point>
+          <coordinates>-45.15240278,-23.31891111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Querência</name>
+        <description><![CDATA[<b>ID:</b> 17<br/><b>Data de ades?o:</b> 03/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 5.14<br/><b>Centr?ide original:</b> 23?05'11.07" S / 45?15'27.72" W]]></description>
+        <Point>
+          <coordinates>-45.25770000,-23.08640833,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Serra Azul</name>
+        <description><![CDATA[<b>ID:</b> 18<br/><b>Data de ades?o:</b> 03/08/2023<br/><b>Munic?pio:</b> Guaratinguetá<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 16.85<br/><b>Centr?ide original:</b> 23?00'32.68" S / 45?09'03.78" W]]></description>
+        <Point>
+          <coordinates>-45.15105000,-23.00907778,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Precioso</name>
+        <description><![CDATA[<b>ID:</b> 19<br/><b>Data de ades?o:</b> 03/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 49.17<br/><b>Centr?ide original:</b> 23?01'30" S / 45?15'44.41" W]]></description>
+        <Point>
+          <coordinates>-45.26233611,-23.02500000,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio dos Eucaliptos</name>
+        <description><![CDATA[<b>ID:</b> 20<br/><b>Data de ades?o:</b> 04/08/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 13.28<br/><b>Centr?ide original:</b> 24?30'43.5" S / 48?53'44.75" W]]></description>
+        <Point>
+          <coordinates>-48.89576389,-24.51208333,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Echeverria</name>
+        <description><![CDATA[<b>ID:</b> 21<br/><b>Data de ades?o:</b> 05/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 174.77<br/><b>Centr?ide original:</b> 23?18'33.9" S / 45?10'18.03" W]]></description>
+        <Point>
+          <coordinates>-45.17167500,-23.30941667,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Vicente</name>
+        <description><![CDATA[<b>ID:</b> 22<br/><b>Data de ades?o:</b> 08/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 6.50<br/><b>Centr?ide original:</b> 23?05'10.06" S / 45?14'18.66" W]]></description>
+        <Point>
+          <coordinates>-45.23851667,-23.08612778,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Miguel/São José do Alto da Cruz</name>
+        <description><![CDATA[<b>ID:</b> 23<br/><b>Data de ades?o:</b> 08/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.79<br/><b>Centr?ide original:</b> 23?11'44.42" S / 45?19'40.11" W]]></description>
+        <Point>
+          <coordinates>-45.32780833,-23.19567222,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Rancho Alegre</name>
+        <description><![CDATA[<b>ID:</b> 24<br/><b>Data de ades?o:</b> 10/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 27.27<br/><b>Centr?ide original:</b> 23?02'55.91" S / 45?16'58.03" W]]></description>
+        <Point>
+          <coordinates>-45.28278611,-23.04886389,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Grota da Onça</name>
+        <description><![CDATA[<b>ID:</b> 25<br/><b>Data de ades?o:</b> 10/08/2023<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 25.61<br/><b>Centr?ide original:</b> 23?24'15.02" S / 45?20'51.44" W]]></description>
+        <Point>
+          <coordinates>-45.34762222,-23.40417222,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Lima – Gleba A</name>
+        <description><![CDATA[<b>ID:</b> 26<br/><b>Data de ades?o:</b> 11/08/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 5.49<br/><b>Centr?ide original:</b> 22?52'04.63" S / 44?46'48.02" W]]></description>
+        <Point>
+          <coordinates>-44.78000556,-22.86795278,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Lima – Gleba B</name>
+        <description><![CDATA[<b>ID:</b> 27<br/><b>Data de ades?o:</b> 11/08/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 52.68<br/><b>Centr?ide original:</b> 22?52'33.64" S / 44?46'23.9" W]]></description>
+        <Point>
+          <coordinates>-44.77330556,-22.87601111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Canto da Boa Vista</name>
+        <description><![CDATA[<b>ID:</b> 28<br/><b>Data de ades?o:</b> 11/08/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 9.41<br/><b>Centr?ide original:</b> 23?17'07.86" S / 45?22'02.06" W]]></description>
+        <Point>
+          <coordinates>-45.36723889,-23.28551667,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Plumbum</name>
+        <description><![CDATA[<b>ID:</b> 29<br/><b>Data de ades?o:</b> 15/08/2023<br/><b>Munic?pio:</b> Adrianópolis<br/><b>UF:</b> PR<br/><b>?rea eleg?vel (ha):</b> 442.14<br/><b>Centr?ide original:</b> 24?41'17.05" S / 48?55'23.26" W]]></description>
+        <Point>
+          <coordinates>-48.92312778,-24.68806944,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Cristais</name>
+        <description><![CDATA[<b>ID:</b> 30<br/><b>Data de ades?o:</b> 15/08/2023<br/><b>Munic?pio:</b> Ribeira<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 232.81<br/><b>Centr?ide original:</b> 24?36'35.28" S / 48?58'13.06" W]]></description>
+        <Point>
+          <coordinates>-48.97029444,-24.60980000,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Estância Córrego da Onça</name>
+        <description><![CDATA[<b>ID:</b> 31<br/><b>Data de ades?o:</b> 17/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 62.44<br/><b>Centr?ide original:</b> 23?00'04.7" S / 45?13'16.73" W]]></description>
+        <Point>
+          <coordinates>-45.22131389,-23.00130556,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Três Irmãos</name>
+        <description><![CDATA[<b>ID:</b> 32<br/><b>Data de ades?o:</b> 20/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.25<br/><b>Centr?ide original:</b> 23?06'13.79" S / 45?14'41.25" W]]></description>
+        <Point>
+          <coordinates>-45.24479167,-23.10383056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Banhado Grande</name>
+        <description><![CDATA[<b>ID:</b> 33<br/><b>Data de ades?o:</b> 20/08/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 7,058.61<br/><b>Centr?ide original:</b> 24?23'22.42" S / 48?38'22.71" W]]></description>
+        <Point>
+          <coordinates>-48.63964167,-24.38956111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Cachoeirinha – Gleba Norte</name>
+        <description><![CDATA[<b>ID:</b> 34<br/><b>Data de ades?o:</b> 21/08/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 9.84<br/><b>Centr?ide original:</b> 23?02'57.45" S / 45?06'52.13" W]]></description>
+        <Point>
+          <coordinates>-45.11448056,-23.04929167,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Cachoeirinha – Gleba Sul</name>
+        <description><![CDATA[<b>ID:</b> 35<br/><b>Data de ades?o:</b> 21/08/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 13.64<br/><b>Centr?ide original:</b> 23?03'11.14" S / 45?07'05.9" W]]></description>
+        <Point>
+          <coordinates>-45.11830556,-23.05309444,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Mata do Vale</name>
+        <description><![CDATA[<b>ID:</b> 36<br/><b>Data de ades?o:</b> 22/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 4.77<br/><b>Centr?ide original:</b> 23?01'53.72" S / 45?15'51.18" W]]></description>
+        <Point>
+          <coordinates>-45.26421667,-23.03158889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Guanandis</name>
+        <description><![CDATA[<b>ID:</b> 37<br/><b>Data de ades?o:</b> 22/08/2023<br/><b>Munic?pio:</b> São Luiz de Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 37.57<br/><b>Centr?ide original:</b> 23?18'41.1" S / 45?09'13.62" W]]></description>
+        <Point>
+          <coordinates>-45.15378333,-23.31141667,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Vale Alto</name>
+        <description><![CDATA[<b>ID:</b> 38<br/><b>Data de ades?o:</b> 22/08/2023<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 128.26<br/><b>Centr?ide original:</b> 23?30'56.63" S / 45?22'50.86" W]]></description>
+        <Point>
+          <coordinates>-45.38079444,-23.51573056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Francisco do Ipê</name>
+        <description><![CDATA[<b>ID:</b> 39<br/><b>Data de ades?o:</b> 25/08/2023<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 7.44<br/><b>Centr?ide original:</b> 23?06'36.9" S / 45?13'04.2" W]]></description>
+        <Point>
+          <coordinates>-45.21783333,-23.11025000,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Geraldo</name>
+        <description><![CDATA[<b>ID:</b> 40<br/><b>Data de ades?o:</b> 26/08/2023<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 98.10<br/><b>Centr?ide original:</b> 23?31'41.81" S / 45?22'12.56" W]]></description>
+        <Point>
+          <coordinates>-45.37015556,-23.52828056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Santa Terezinha</name>
+        <description><![CDATA[<b>ID:</b> 41<br/><b>Data de ades?o:</b> 28/08/2023<br/><b>Munic?pio:</b> Pirajuí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 29.81<br/><b>Centr?ide original:</b> 21?56'30.33" S / 49?26'31.66" W]]></description>
+        <Point>
+          <coordinates>-49.44212778,-21.94175833,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Rio Acima</name>
+        <description><![CDATA[<b>ID:</b> 42<br/><b>Data de ades?o:</b> 10/09/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 353.08<br/><b>Centr?ide original:</b> 24?33'01.97" S / 48?47'33.61" W]]></description>
+        <Point>
+          <coordinates>-48.79266944,-24.55054722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Rio Acima - Passa Vinte</name>
+        <description><![CDATA[<b>ID:</b> 43<br/><b>Data de ades?o:</b> 10/09/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 112.79<br/><b>Centr?ide original:</b> 24?32'46.85" S / 48?46'50.27" W]]></description>
+        <Point>
+          <coordinates>-48.78063056,-24.54634722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Herdade das Fontanhas</name>
+        <description><![CDATA[<b>ID:</b> 44<br/><b>Data de ades?o:</b> 10/09/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 80.80<br/><b>Centr?ide original:</b> 24?32'44.3" S / 48?46'25.75" W]]></description>
+        <Point>
+          <coordinates>-48.77381944,-24.54563889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Boa Esperança</name>
+        <description><![CDATA[<b>ID:</b> 45<br/><b>Data de ades?o:</b> 21/09/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 56.93<br/><b>Centr?ide original:</b> 23?06'43.9" S / 45?05'43.38" W]]></description>
+        <Point>
+          <coordinates>-45.09538333,-23.11219444,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Barro Vermelho</name>
+        <description><![CDATA[<b>ID:</b> 46<br/><b>Data de ades?o:</b> 21/09/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 4.03<br/><b>Centr?ide original:</b> 23?06'20.86" S / 45?06'11.57" W]]></description>
+        <Point>
+          <coordinates>-45.10321389,-23.10579444,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Judas Tadeu</name>
+        <description><![CDATA[<b>ID:</b> 47<br/><b>Data de ades?o:</b> 26/09/2023<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 29.12<br/><b>Centr?ide original:</b> 23?25'43.64" S / 45?17'37.57" W]]></description>
+        <Point>
+          <coordinates>-45.29376944,-23.42878889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Canto do Caetê</name>
+        <description><![CDATA[<b>ID:</b> 48<br/><b>Data de ades?o:</b> 04/10/2023<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.25<br/><b>Centr?ide original:</b> 23?17'32.64" S / 45?11'35.67" W]]></description>
+        <Point>
+          <coordinates>-45.19324167,-23.29240000,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São José do Funil</name>
+        <description><![CDATA[<b>ID:</b> 49<br/><b>Data de ades?o:</b> 17/10/2023<br/><b>Munic?pio:</b> Rio Preto<br/><b>UF:</b> MG<br/><b>?rea eleg?vel (ha):</b> 33.38<br/><b>Centr?ide original:</b> 22?01'35.1" S / 43?55'49.56" W]]></description>
+        <Point>
+          <coordinates>-43.93043333,-22.02641667,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Vale do Amor</name>
+        <description><![CDATA[<b>ID:</b> 50<br/><b>Data de ades?o:</b> 17/10/2023<br/><b>Munic?pio:</b> Rio Preto<br/><b>UF:</b> MG<br/><b>?rea eleg?vel (ha):</b> 53.38<br/><b>Centr?ide original:</b> 22?01'41.45" S / 43?56'00.59" W]]></description>
+        <Point>
+          <coordinates>-43.93349722,-22.02818056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio do Alto</name>
+        <description><![CDATA[<b>ID:</b> 51<br/><b>Data de ades?o:</b> 17/10/2023<br/><b>Munic?pio:</b> Rio Preto<br/><b>UF:</b> MG<br/><b>?rea eleg?vel (ha):</b> 24.98<br/><b>Centr?ide original:</b> 22?01'27.95" S / 43?56'24.83" W]]></description>
+        <Point>
+          <coordinates>-43.94023056,-22.02443056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio dos Macacos</name>
+        <description><![CDATA[<b>ID:</b> 52<br/><b>Data de ades?o:</b> 17/10/2023<br/><b>Munic?pio:</b> Rio Preto<br/><b>UF:</b> MG<br/><b>?rea eleg?vel (ha):</b> 47.75<br/><b>Centr?ide original:</b> 22?01'47.3" S / 43?56'16.64" W]]></description>
+        <Point>
+          <coordinates>-43.93795556,-22.02980556,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda São Geraldo</name>
+        <description><![CDATA[<b>ID:</b> 53<br/><b>Data de ades?o:</b> 19/10/2023<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 15.91<br/><b>Centr?ide original:</b> 23?07'59.02" S / 44?57'45.77" W]]></description>
+        <Point>
+          <coordinates>-44.96271389,-23.13306111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio do Bello</name>
+        <description><![CDATA[<b>ID:</b> 54<br/><b>Data de ades?o:</b> 28/10/2023<br/><b>Munic?pio:</b> Paraibuna<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 3.67<br/><b>Centr?ide original:</b> 23?27'52.73" S / 45?42'37.78" W]]></description>
+        <Point>
+          <coordinates>-45.71049444,-23.46464722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Pinheiros</name>
+        <description><![CDATA[<b>ID:</b> 55<br/><b>Data de ades?o:</b> 31/10/2023<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 57.11<br/><b>Centr?ide original:</b> 24?21'35.06" S / 48?46'30.55" W]]></description>
+        <Point>
+          <coordinates>-48.77515278,-24.35973889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Pepino</name>
+        <description><![CDATA[<b>ID:</b> 56<br/><b>Data de ades?o:</b> 10/11/2023<br/><b>Munic?pio:</b> Ribeira<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 104.73<br/><b>Centr?ide original:</b> 24?33'02.33" S / 48?57'41.52" W]]></description>
+        <Point>
+          <coordinates>-48.96153333,-24.55064722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Mirante da Montanha</name>
+        <description><![CDATA[<b>ID:</b> 57<br/><b>Data de ades?o:</b> 02/01/2024<br/><b>Munic?pio:</b> Lagoinha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 4.65<br/><b>Centr?ide original:</b> 23?06'14.8" S / 45?15'02.92" W]]></description>
+        <Point>
+          <coordinates>-45.25081111,-23.10411111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Canto do Beija-Flor</name>
+        <description><![CDATA[<b>ID:</b> 58<br/><b>Data de ades?o:</b> 05/01/2024<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 1.78<br/><b>Centr?ide original:</b> 23?14'25.94" S / 45?15'14.37" W]]></description>
+        <Point>
+          <coordinates>-45.25399167,-23.24053889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Estrela da Prata</name>
+        <description><![CDATA[<b>ID:</b> 59<br/><b>Data de ades?o:</b> 15/01/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 32.61<br/><b>Centr?ide original:</b> 23?23'49.58" S / 45?14'31.03" W]]></description>
+        <Point>
+          <coordinates>-45.24195278,-23.39710556,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Rosário</name>
+        <description><![CDATA[<b>ID:</b> 60<br/><b>Data de ades?o:</b> 15/01/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 18.74<br/><b>Centr?ide original:</b> 23?23'51.47" S / 45?14'44.61" W]]></description>
+        <Point>
+          <coordinates>-45.24572500,-23.39763056,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio São Francisco</name>
+        <description><![CDATA[<b>ID:</b> 61<br/><b>Data de ades?o:</b> 15/01/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 19.78<br/><b>Centr?ide original:</b> 23?22'50.61" S / 45?15'19.88" W]]></description>
+        <Point>
+          <coordinates>-45.25552222,-23.38072500,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda São Francisco</name>
+        <description><![CDATA[<b>ID:</b> 62<br/><b>Data de ades?o:</b> 15/01/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 66.65<br/><b>Centr?ide original:</b> 23?23'21.99" S / 45?15'35.06" W]]></description>
+        <Point>
+          <coordinates>-45.25973889,-23.38944167,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Bela Vista</name>
+        <description><![CDATA[<b>ID:</b> 63<br/><b>Data de ades?o:</b> 02/02/2024<br/><b>Munic?pio:</b> Cunha<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 10.42<br/><b>Centr?ide original:</b> 23?08'40.29" S / 45?05'54.53" W]]></description>
+        <Point>
+          <coordinates>-45.09848056,-23.14452500,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Associação Terra Nascente</name>
+        <description><![CDATA[<b>ID:</b> 64<br/><b>Data de ades?o:</b> 20/03/2024<br/><b>Munic?pio:</b> Monteiro Lobato<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 16.91<br/><b>Centr?ide original:</b> 22?53'55.05" S / 45?49'47.53" W]]></description>
+        <Point>
+          <coordinates>-45.82986944,-22.89862500,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Escutador</name>
+        <description><![CDATA[<b>ID:</b> 65<br/><b>Data de ades?o:</b> 26/03/2024<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 27.13<br/><b>Centr?ide original:</b> 24?25'47.13" S / 48?58'01.92" W]]></description>
+        <Point>
+          <coordinates>-48.96720000,-24.42975833,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Iguatemi</name>
+        <description><![CDATA[<b>ID:</b> 66<br/><b>Data de ades?o:</b> 26/03/2024<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 73.70<br/><b>Centr?ide original:</b> 24?32'05.67" S / 48?54'48.05" W]]></description>
+        <Point>
+          <coordinates>-48.91334722,-24.53490833,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Cabeceira do Rio Claro</name>
+        <description><![CDATA[<b>ID:</b> 67<br/><b>Data de ades?o:</b> 26/03/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 35.57<br/><b>Centr?ide original:</b> 24?37'14.49" S / 48?56'13.36" W]]></description>
+        <Point>
+          <coordinates>-48.93704444,-24.62069167,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Serra Atlântica</name>
+        <description><![CDATA[<b>ID:</b> 68<br/><b>Data de ades?o:</b> 05/04/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 178.85<br/><b>Centr?ide original:</b> 24?37'38.42" S / 48?51'31.36" W]]></description>
+        <Point>
+          <coordinates>-48.85871111,-24.62733889,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Divisa Alegre</name>
+        <description><![CDATA[<b>ID:</b> 69<br/><b>Data de ades?o:</b> 25/04/2024<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 25.77<br/><b>Centr?ide original:</b> 24?31'25.49" S / 48?54'28.41" W]]></description>
+        <Point>
+          <coordinates>-48.90789167,-24.52374722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Caviúnas</name>
+        <description><![CDATA[<b>ID:</b> 70<br/><b>Data de ades?o:</b> 20/05/2024<br/><b>Munic?pio:</b> Ribeira<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 47.56<br/><b>Centr?ide original:</b> 24?35'29.62" S / 48?57'36.39" W]]></description>
+        <Point>
+          <coordinates>-48.96010833,-24.59156111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Barrinha da Forquilha</name>
+        <description><![CDATA[<b>ID:</b> 71<br/><b>Data de ades?o:</b> 21/05/2024<br/><b>Munic?pio:</b> Adrianópolis<br/><b>UF:</b> PR<br/><b>?rea eleg?vel (ha):</b> 143.10<br/><b>Centr?ide original:</b> 24?42'20.77" S / 48?59'42.95" W]]></description>
+        <Point>
+          <coordinates>-48.99526389,-24.70576944,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Santo Antônio da Jacutinga</name>
+        <description><![CDATA[<b>ID:</b> 72<br/><b>Data de ades?o:</b> 21/05/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 115.01<br/><b>Centr?ide original:</b> 24?36'21.28" S / 48?45'19.29" W]]></description>
+        <Point>
+          <coordinates>-48.75535833,-24.60591111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Rio Claro</name>
+        <description><![CDATA[<b>ID:</b> 73<br/><b>Data de ades?o:</b> 01/06/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 17.29<br/><b>Centr?ide original:</b> 24?37'24.62" S / 48?52'11.75" W]]></description>
+        <Point>
+          <coordinates>-48.86993056,-24.62350556,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Quatis IV and Sítio Samuel</name>
+        <description><![CDATA[<b>ID:</b> 74<br/><b>Data de ades?o:</b> 01/06/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 79.06<br/><b>Centr?ide original:</b> 24?37'35.11" S / 48?50'02.31" W]]></description>
+        <Point>
+          <coordinates>-48.83397500,-24.62641944,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Chiqueiro</name>
+        <description><![CDATA[<b>ID:</b> 75<br/><b>Data de ades?o:</b> 17/06/2024<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 21.56<br/><b>Centr?ide original:</b> 24?24'28.13" S / 48?53'28.28" W]]></description>
+        <Point>
+          <coordinates>-48.89118889,-24.40781389,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Córrego Novo</name>
+        <description><![CDATA[<b>ID:</b> 76<br/><b>Data de ades?o:</b> 17/06/2024<br/><b>Munic?pio:</b> Apiaí<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 18.72<br/><b>Centr?ide original:</b> 24?31'22.12" S / 48?56'40.57" W]]></description>
+        <Point>
+          <coordinates>-48.94460278,-24.52281111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Dois Irmãos</name>
+        <description><![CDATA[<b>ID:</b> 77<br/><b>Data de ades?o:</b> 17/06/2024<br/><b>Munic?pio:</b> Barra do Chapéu<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 8.86<br/><b>Centr?ide original:</b> 24?24'40.11" S / 49?03'56.81" W]]></description>
+        <Point>
+          <coordinates>-49.06578056,-24.41114167,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Santo Antônio</name>
+        <description><![CDATA[<b>ID:</b> 78<br/><b>Data de ades?o:</b> 17/06/2024<br/><b>Munic?pio:</b> Itaóca<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 4.72<br/><b>Centr?ide original:</b> 24?39'25.55" S / 48?53'21.47" W]]></description>
+        <Point>
+          <coordinates>-48.88929722,-24.65709722,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Canto Santa Clara</name>
+        <description><![CDATA[<b>ID:</b> 79<br/><b>Data de ades?o:</b> 25/06/2024<br/><b>Munic?pio:</b> São Luiz do Paraitinga<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 15.93<br/><b>Centr?ide original:</b> 23?18'34.66" S / 45?18'39.2" W]]></description>
+        <Point>
+          <coordinates>-45.31088889,-23.30962778,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Manacá 1</name>
+        <description><![CDATA[<b>ID:</b> 80<br/><b>Data de ades?o:</b> 26/06/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 3.43<br/><b>Centr?ide original:</b> 23?23'59.62" S / 45?16'03.14" W]]></description>
+        <Point>
+          <coordinates>-45.26753889,-23.39989444,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Fazenda Manacá 2</name>
+        <description><![CDATA[<b>ID:</b> 81<br/><b>Data de ades?o:</b> 26/06/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 46.82<br/><b>Centr?ide original:</b> 23?23'49.04" S / 45?16'15.72" W]]></description>
+        <Point>
+          <coordinates>-45.27103333,-23.39695556,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Chácara São Valentin</name>
+        <description><![CDATA[<b>ID:</b> 82<br/><b>Data de ades?o:</b> 22/07/2024<br/><b>Munic?pio:</b> Natividade da Serra<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 18.88<br/><b>Centr?ide original:</b> 23?23'51.4" S / 45?23'52.22" W]]></description>
+        <Point>
+          <coordinates>-45.39783889,-23.39761111,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Areado</name>
+        <description><![CDATA[<b>ID:</b> 83<br/><b>Data de ades?o:</b> 23/07/2024<br/><b>Munic?pio:</b> Ribeira<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 43.65<br/><b>Centr?ide original:</b> 24?34'28.36" S / 49?00'05.72" W]]></description>
+        <Point>
+          <coordinates>-49.00158889,-24.57454444,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Fazendinha</name>
+        <description><![CDATA[<b>ID:</b> 84<br/><b>Data de ades?o:</b> 28/10/2024<br/><b>Munic?pio:</b> Aparecida<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 11.68<br/><b>Centr?ide original:</b> 22?51'26.69" S / 45?12'34.14" W]]></description>
+        <Point>
+          <coordinates>-45.20948333,-22.85741389,0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <styleUrl>#centroid-point</styleUrl>
+        <name>Sítio Boa Esperança</name>
+        <description><![CDATA[<b>ID:</b> 85<br/><b>Data de ades?o:</b> 28/10/2024<br/><b>Munic?pio:</b> Aparecida<br/><b>UF:</b> SP<br/><b>?rea eleg?vel (ha):</b> 14.63<br/><b>Centr?ide original:</b> 22?51'28.94" S / 45?12'43.67" W]]></description>
+        <Point>
+          <coordinates>-45.21213056,-22.85803889,0</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>
