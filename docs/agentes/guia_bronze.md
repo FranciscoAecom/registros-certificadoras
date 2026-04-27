@@ -29,10 +29,13 @@ A camada `bronze` não deve:
 
 ## Estrutura de Dados
 
-Em repouso, cada snapshot é armazenado como ZIP:
+Em repouso, cada snapshot é armazenado como bundle:
 
 ```text
 data/project_standards/01_bronze/<certificadora>/YYYYMMDD.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_core.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_core_001.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_spatial_001.zip
 ```
 
 Durante a execução, o conteúdo descompactado segue a estrutura:
@@ -41,15 +44,23 @@ Durante a execução, o conteúdo descompactado segue a estrutura:
 data/project_standards/01_bronze/<certificadora>/YYYYMMDD/
 ├── list/
 │   └── projects.json
-└── projects/
-    ├── <project_id>.json
-    └── ...
+├── projects/
+│   ├── <project_id>.json
+│   └── ...
+└── spatial/
+    └── <project_id>/
+        └── <arquivo_espacial>
 ```
 
 - O diretório datado `YYYYMMDD` só deve ser criado durante a execução do script.
 - O snapshot temporal vem antes de `list/` e `projects/`.
 - O snapshot é obrigatório porque a execução ocorre tipicamente no máximo uma vez por mês.
-- Ao término da execução, o script recompacta o snapshot em `.zip` e remove a pasta original.
+- Ao término da execução, o script recompacta o snapshot e remove a pasta original.
+- O formato preferencial em repouso é:
+  - `YYYYMMDD_core.zip` quando o core couber em um único arquivo
+  - `YYYYMMDD_core_001.zip`, `YYYYMMDD_core_002.zip`, ... quando o core precisar ser particionado
+  - `YYYYMMDD_spatial_001.zip`, `YYYYMMDD_spatial_002.zip`, ... para anexos espaciais quando existirem
+- O arquivo simples `YYYYMMDD.zip` deve ser tratado como formato legado ainda aceito para leitura.
 
 ## Estrutura de Código
 
@@ -214,8 +225,8 @@ Os snapshots de bronze são armazenados compactados para reduzir o tamanho do re
 
 Regras:
 
-- Ao final de cada execução de `extract_project_list.py` ou `extract_project_details.py`, o script deve compactar o diretório do snapshot em `.zip` usando `pack_directory` de `archive_data.py` e remover a pasta original.
-- Antes de ler dados de um snapshot que possa estar compactado, o script deve verificar se existe o `.zip` correspondente e, se necessário, descompactá-lo usando `unpack_archive` de `archive_data.py`.
+- Ao final de cada execução de `extract_project_list.py` ou `extract_project_details.py`, o script deve compactar o diretório do snapshot usando as funções centralizadas de bundle em `archive_data.py` e remover a pasta original.
+- Antes de ler dados de um snapshot que possa estar compactado, o script deve verificar se existe o artefato correspondente (`YYYYMMDD.zip`, `YYYYMMDD_core.zip` ou `YYYYMMDD_core_001.zip`) e, se necessário, descompactá-lo usando as funções centralizadas de `archive_data.py`.
 - A compactação e descompactação devem usar exclusivamente as funções centralizadas em `src/projects_standards/shared/archive_data.py`.
 - Nenhum script individual deve duplicar lógica de `zipfile` ou `shutil` para esse fim.
 - O framework da camada `silver` também gerencia automaticamente a descompactação do bronze antes do processamento e a recompactação após a geração do dataset.

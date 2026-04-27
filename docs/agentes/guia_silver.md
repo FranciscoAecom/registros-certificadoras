@@ -124,9 +124,9 @@ Responsabilidades esperadas:
 
 - `framework.py`
   - orquestracao de mapeamento e geracao de dataset
-  - descompacta automaticamente o snapshot `bronze` (`.zip`) antes de ler os dados
-  - recompacta o snapshot `bronze` em `.zip` ao final do processamento
-  - usa `pack_directory` e `unpack_archive` de `archive_data.py`
+  - descompacta automaticamente o snapshot `bronze` legado (`YYYYMMDD.zip`) ou em bundle (`YYYYMMDD_core.zip` / `YYYYMMDD_core_001.zip`) antes de ler os dados
+  - recompacta o snapshot `bronze` ao final do processamento no formato de bundle centralizado
+  - usa as funções centralizadas de `archive_data.py`
 - `normalize.py`
   - normalizacao por campo canonico
 - `dates.py`

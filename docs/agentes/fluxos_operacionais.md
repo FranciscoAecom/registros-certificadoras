@@ -10,12 +10,12 @@ Objetivo:
 Passos esperados:
 
 1. Receber `--date YYYYMMDD`.
-2. Se existir `YYYYMMDD.zip` para a mesma data, descompactar usando `unpack_archive` de `archive_data.py`.
+2. Se existir snapshot compactado para a mesma data (`YYYYMMDD.zip`, `YYYYMMDD_core.zip` ou `YYYYMMDD_core_001.zip`), descompactar usando as funções centralizadas de `archive_data.py`.
 3. Criar o diretório de saída da data somente durante a execução.
 4. Consultar a API paginada da certificadora.
 5. Acumular todos os projetos.
 6. Salvar o snapshot bruto.
-7. Compactar o diretório do snapshot em `.zip` usando `pack_directory` de `archive_data.py` e remover a pasta original.
+7. Compactar o diretório do snapshot usando o formato de bundle centralizado de `archive_data.py` e remover a pasta original.
 8. Exibir resumo final no terminal.
 9. Manter comentário inicial do script e comentários objetivos antes de cada função usada no fluxo.
 
@@ -41,7 +41,7 @@ Objetivo:
 Passos esperados:
 
 1. Receber `--date YYYYMMDD`.
-2. Se o snapshot estiver compactado como `YYYYMMDD.zip`, descompactar usando `unpack_archive` de `archive_data.py`.
+2. Se o snapshot estiver compactado como `YYYYMMDD.zip`, `YYYYMMDD_core.zip` ou `YYYYMMDD_core_001.zip`, descompactar usando as funções centralizadas de `archive_data.py`.
 3. Ler `data/project_standards/01_bronze/<certificadora>/YYYYMMDD/list/projects.json`.
 3. Extrair o identificador do projeto.
 4. Consultar o endpoint de detalhe.
@@ -64,7 +64,7 @@ Passos esperados:
 18. Quando a fonte responder com bloqueio temporário, como `429 Too Many Requests`, aguardar, repetir o mesmo projeto por um número limitado de tentativas e só então registrar a falha definitiva.
 19. Quando a sessão de navegador, conexão remota ou contexto externo cair no meio da coleta, tentar reinicializar e retomar a lista antes de encerrar o script.
 20. Antes de encerrar o processo, executar teardown explícito dos recursos externos abertos pela coleta.
-21. Compactar o diretório do snapshot em `.zip` usando `pack_directory` de `archive_data.py` e remover a pasta original.
+21. Compactar o diretório do snapshot usando o formato de bundle centralizado de `archive_data.py` e remover a pasta original.
 22. Manter comentário inicial do script e comentários objetivos antes de cada função usada no fluxo.
 
 Observacao:
@@ -153,7 +153,7 @@ Objetivo:
 Passos esperados:
 
 1. Executar o builder em `src/projects_standards/<certificadora>/silver/build_silver_dataset.py`.
-2. O framework da `silver` descompacta automaticamente o snapshot `bronze` (`YYYYMMDD.zip`) antes de ler os dados, usando `unpack_archive` de `archive_data.py`.
+2. O framework da `silver` descompacta automaticamente o snapshot `bronze` (legado `YYYYMMDD.zip` ou bundle `YYYYMMDD_core.zip` / `YYYYMMDD_core_001.zip`) antes de ler os dados, usando as funções centralizadas de `archive_data.py`.
 3. Executar junto a sincronizacao de status em `src/projects_standards/<certificadora>/silver/sync_status_reference.py`, de forma automatica ao fim do builder ou manual quando necessario.
 4. Executar junto a sincronizacao de paises em `src/projects_standards/<certificadora>/silver/sync_country_reference.py`, de forma automatica ao fim do builder ou manual quando necessario.
 5. Ao fim de cada construcao da `silver`, sincronizar tambem no `data/project_standards/00_reference/reference_dataset.xlsx` todas as formas observadas de:
@@ -171,7 +171,7 @@ Passos esperados:
 13. Padronizar campos `datetime`, quando existirem, como `YYYY-MM-DDTHH:MM:SS`.
 14. Preservar rastreabilidade ate o `bronze` e nao inventar valores ausentes.
 15. Registrar falhas operacionais do builder em `src/projects_standards/<certificadora>/silver/logs/` quando houver.
-16. Ao final, o framework recompacta o snapshot `bronze` em `.zip` usando `pack_directory` de `archive_data.py` e remove a pasta descompactada.
+16. Ao final, o framework recompacta o snapshot `bronze` usando o formato de bundle centralizado de `archive_data.py` e remove a pasta descompactada.
 17. Remover artefatos temporarios de teste ou depuracao ao final da execucao.
 
 Observacao:

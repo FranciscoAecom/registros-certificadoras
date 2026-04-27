@@ -59,17 +59,23 @@ src/projects_standards/shared/silver/quality_checks.py
 
 ```text
 data/project_standards/01_bronze/<certificadora>/YYYYMMDD.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_core.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_core_001.zip
+data/project_standards/01_bronze/<certificadora>/YYYYMMDD_spatial_001.zip
 ```
 
-Em repouso, os snapshots ficam compactados como `.zip`. Durante a execução, o script descompacta para a estrutura interna:
+Em repouso, os snapshots ficam compactados como bundle. Durante a execução, o script descompacta para a estrutura interna:
 
 ```text
 data/project_standards/01_bronze/<certificadora>/YYYYMMDD/
 ├── list/
 │   └── projects.json
-└── projects/
-    ├── <project_id>.json
-    └── ...
+├── projects/
+│   ├── <project_id>.json
+│   └── ...
+└── spatial/
+    └── <project_id>/
+        └── <arquivo_espacial>
 ```
 
 Ao final, o script recompacta o snapshot e remove a pasta.
@@ -124,9 +130,13 @@ Esses arquivos são a base esperada para tabelas de apoio e `de_para` futuros.
 - O snapshot é obrigatório porque a execução ocorre tipicamente no máximo uma vez por mês.
 - `extract_project_details.py` deve receber a data da lista a ser consumida.
 - O diretório de data não deve existir previamente por convenção manual. Ele nasce na execução.
-- Em repouso, cada snapshot é armazenado como `YYYYMMDD.zip` para reduzir o tamanho do repositório.
+- Em repouso, o formato preferencial do snapshot é o bundle:
+  - `YYYYMMDD_core.zip` quando o core couber em um único arquivo
+  - `YYYYMMDD_core_001.zip`, `YYYYMMDD_core_002.zip`, ... quando o core precisar ser particionado
+  - `YYYYMMDD_spatial_001.zip`, `YYYYMMDD_spatial_002.zip`, ... para anexos espaciais quando existirem
+- O arquivo simples `YYYYMMDD.zip` deve ser tratado como formato legado ainda aceito para leitura.
 - A compactação e descompactação de snapshots são gerenciadas automaticamente pelos scripts de bronze e pelo framework da silver.
-- As funções centralizadas de compactação ficam em `src/projects_standards/shared/archive_data.py`.
+- As funções centralizadas de compactação e descompactação ficam em `src/projects_standards/shared/archive_data.py`.
 
 ## Regra para Dados Brutos
 
