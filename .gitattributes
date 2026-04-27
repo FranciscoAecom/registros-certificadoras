@@ -1,0 +1,2 @@
+data/project_standards/01_bronze/**/*.zip filter=lfs diff=lfs merge=lfs -text
+resultados/Certificadoras/**/*.gpkg filter=lfs diff=lfs merge=lfs -text

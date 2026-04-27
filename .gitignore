@@ -27,18 +27,16 @@ data/project_standards/01_bronze/**/projects/
 # Silver: ignorar arquivos tabulares intermediarios
 data/project_standards/02_silver/**/*.json
 data/project_standards/02_silver/**/*.csv
+data/project_standards/02_silver/**/*.zip
 
 # Gold: ignorar arquivos analiticos gerados
 data/project_standards/03_gold/projects/*.json
 data/project_standards/03_gold/projects/*.xlsx
+data/project_standards/03_gold/projects/*.zip
 data/project_standards/03_gold/projects/backup/
-
-
-# Ignore only ZIPs that exceed GitHub's 100 MB file limit
-data/project_standards/01_bronze/verra/20260402.zip
-data/project_standards/02_silver/verra/20260402.zip
-data/project_standards/03_gold/projects/2026-04.zip
-
 
 # Pasta Resultado Verra
 data/project_standards/03_gold/projects/Verra/
+
+# Git LFS cobre artefatos binarios pesados versionados no repositorio.
+# Nao ignorar snapshots bronze em ZIP nem geopackages de resultados.
