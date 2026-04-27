@@ -1,22 +1,22 @@
 # Objetivo do script:
 # Ler a lista bruta de uma data especifica, consultar o detalhe de cada projeto e salvar um JSON bronze por projeto.
 # Processo:
-# 1. Ler argumentos CLI (--date, --limit, parametros de ritmo e retry).
-# 2. Descompactar o snapshot se estiver zipado.
+# 1. Ler argumentos CLI (--date, --limit, parametros de ritmo, retry e empacotamento espacial).
+# 2. Descompactar o snapshot se estiver salvo em ZIP simples ou bundle core+spatial.
 # 3. Carregar lista de projetos do snapshot da data informada.
 # 4. Identificar projetos pendentes (sem arquivo de detalhe ou com --force).
 # 5. Exibir cabecalho com parametros da execucao.
 # 6. Para cada projeto, consultar o endpoint de detalhe da certificadora.
-# 7. Montar payload com source, list_data e detail_data.
+# 7. Baixar anexos cartograficos quando existirem e salva-los como arquivos do snapshot.
+# 8. Montar payload com source, list_data e detail_data apontando para os arquivos espaciais.
 # 8. Salvar um JSON por projeto no diretorio projects/ do snapshot.
 # 9. Exibir progresso a cada 10 projetos (percentual e tempo restante).
 # 10. Registrar falhas individuais sem interromper a execucao.
 # 11. Exibir resumo final e gravar log de falhas se houver.
-# 12. Compactar o diretorio do snapshot em ZIP.
+# 12. Compactar o snapshot em bundle core + partes espaciais.
 
 
 import argparse
-import base64
 import json
 import re
 import sys
@@ -25,7 +25,7 @@ import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from urllib import error, request
+from urllib import error, parse, request
 
 from runtime_cleanup import managed_execution
 
@@ -33,7 +33,11 @@ _ROOT = Path(__file__).resolve().parents[4]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
+from src.projects_standards.shared.archive_data import (
+    DEFAULT_SPATIAL_PART_MAX_BYTES,
+    pack_snapshot_bundle,
+    unpack_snapshot_bundle,
+)
 
 
 PAGE_URL_TEMPLATE = "https://www.ecoregistry.io/projects/{project_internal_id}"
@@ -45,6 +49,7 @@ DEFAULT_BATCH_SIZE = 10
 DEFAULT_BATCH_SLEEP_SECONDS = 2.0
 DEFAULT_PROGRESS_REPORT_EVERY = 10
 DEFAULT_TIMEOUT_SECONDS = 30.0
+DEFAULT_SPATIAL_SUBDIR_NAME = "spatial"
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -95,6 +100,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_TIMEOUT_SECONDS,
         help=f"Timeout por requisicao em segundos. Padrao: {DEFAULT_TIMEOUT_SECONDS}.",
     )
+    parser.add_argument(
+        "--spatial-part-max-bytes",
+        type=int,
+        default=DEFAULT_SPATIAL_PART_MAX_BYTES,
+        help="Teto em bytes para cada ZIP spatial_<n>. Padrao seguro abaixo do limite do Git LFS.",
+    )
     return parser.parse_args()
 
 
@@ -132,11 +143,13 @@ def build_project_source(
 
 
 # Monta os caminhos de entrada e saida usados pelo script.
-def build_paths(snapshot_date: str) -> tuple[Path, Path]:
+def build_paths(snapshot_date: str) -> tuple[Path, Path, Path, Path]:
     root = Path(__file__).resolve().parents[4]
-    list_path = root / "data" / "project_standards" / "01_bronze" / "cercarbono" / snapshot_date / "list" / "projects.json"
-    projects_dir = root / "data" / "project_standards" / "01_bronze" / "cercarbono" / snapshot_date / "projects"
-    return list_path, projects_dir
+    snapshot_dir = root / "data" / "project_standards" / "01_bronze" / "cercarbono" / snapshot_date
+    list_path = snapshot_dir / "list" / "projects.json"
+    projects_dir = snapshot_dir / "projects"
+    spatial_dir = snapshot_dir / DEFAULT_SPATIAL_SUBDIR_NAME
+    return snapshot_dir, list_path, projects_dir, spatial_dir
 
 
 # Monta o caminho do log de falhas para o snapshot informado.
@@ -145,9 +158,9 @@ def build_failure_log_path(snapshot_date: str) -> Path:
 
 
 # Normaliza o valor para uso seguro em nomes de arquivo.
-def sanitize_filename(value: str) -> str:
+def sanitize_filename(value: str, fallback: str = "project") -> str:
     cleaned = re.sub(r'[<>:"/\\\\|?*]+', "_", value).strip()
-    return cleaned or "project"
+    return cleaned or fallback
 
 
 # Retorna o horario atual em formato ISO UTC.
@@ -377,7 +390,7 @@ def fetch_spatial_document_download_info(
 
 
 # Baixa o binario bruto de um documento remoto.
-def fetch_document_bytes(url: str, timeout: float) -> bytes:
+def fetch_document_bytes(url: str, timeout: float) -> tuple[bytes, str]:
     req = request.Request(
         url=url,
         method="GET",
@@ -388,7 +401,7 @@ def fetch_document_bytes(url: str, timeout: float) -> bytes:
     )
     try:
         with request.urlopen(req, timeout=timeout) as response:
-            return response.read()
+            return response.read(), str(response.headers.get("Content-Type") or "")
     except error.HTTPError as exc:
         details = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"Erro HTTP {exc.code} ao baixar {url}. Resposta: {details}") from exc
@@ -396,10 +409,72 @@ def fetch_document_bytes(url: str, timeout: float) -> bytes:
         raise RuntimeError(f"Falha de rede ao baixar {url}: {exc}") from exc
 
 
+# Infere a extensao mais segura para o documento espacial.
+def infer_spatial_extension(
+    *,
+    source_url: str,
+    response_content_type: str,
+    suggested_name: str,
+) -> str:
+    lower_name = suggested_name.lower()
+    for suffix in (".zip", ".kmz", ".kml", ".geojson", ".shp", ".dbf", ".cpg", ".sbn", ".sbx", ".shx", ".prj", ".jpg", ".jpeg", ".png"):
+        if lower_name.endswith(suffix):
+            return suffix
+
+    lower_content_type = response_content_type.lower()
+    if "zip" in lower_content_type:
+        return ".zip"
+    if "google-earth.kmz" in lower_content_type:
+        return ".kmz"
+    if "google-earth.kml" in lower_content_type:
+        return ".kml"
+    if "geo+json" in lower_content_type or "geojson" in lower_content_type:
+        return ".geojson"
+    if "jpeg" in lower_content_type or "jpg" in lower_content_type:
+        return ".jpg"
+    if "png" in lower_content_type:
+        return ".png"
+
+    source_suffix = Path(parse.urlparse(source_url).path).suffix.lower()
+    return source_suffix
+
+
+# Persiste o documento espacial no snapshot e retorna o caminho relativo salvo.
+def persist_spatial_document(
+    *,
+    snapshot_dir: Path,
+    spatial_subdir_name: str,
+    project_id: str,
+    document_index: int,
+    source_url: str,
+    suggested_name: str,
+    response_content_type: str,
+    raw_bytes: bytes,
+) -> str:
+    extension = infer_spatial_extension(
+        source_url=source_url,
+        response_content_type=response_content_type,
+        suggested_name=suggested_name,
+    )
+    fallback_name = f"document_{document_index:03d}{extension}"
+    safe_name = sanitize_filename(suggested_name, fallback_name)
+    if extension and not safe_name.lower().endswith(extension):
+        safe_name = f"{safe_name}{extension}"
+
+    relative_path = Path(spatial_subdir_name) / project_id / f"{document_index:03d}_{safe_name}"
+    target_path = snapshot_dir / relative_path
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_bytes(raw_bytes)
+    return relative_path.as_posix()
+
+
 # Baixa e preserva anexos cartograficos ZIP do projeto dentro do payload bronze.
 def enrich_spatial_documents(
     detail_payload: dict[str, Any],
     *,
+    snapshot_dir: Path,
+    spatial_subdir_name: str,
+    project_public_id: str,
     project_internal_id: str,
     timeout: float,
 ) -> None:
@@ -421,7 +496,7 @@ def enrich_spatial_documents(
         return
 
     enriched_documents: list[dict[str, Any]] = []
-    for spatial_document in spatial_documents:
+    for document_index, spatial_document in enumerate(spatial_documents, start=1):
         enriched = dict(spatial_document)
         document_id = spatial_document.get("id")
         if document_id is None:
@@ -440,10 +515,20 @@ def enrich_spatial_documents(
             if not download_url:
                 raise RuntimeError("Resposta de download sem campo url.")
 
-            raw_bytes = fetch_document_bytes(download_url, timeout)
-            enriched["contentEncoding"] = "base64"
-            enriched["contentType"] = "application/zip"
-            enriched["content"] = base64.b64encode(raw_bytes).decode("ascii")
+            raw_bytes, response_content_type = fetch_document_bytes(download_url, timeout)
+            enriched["contentType"] = response_content_type
+            enriched["storageMode"] = "snapshot_file"
+            enriched["snapshotRelativePath"] = persist_spatial_document(
+                snapshot_dir=snapshot_dir,
+                spatial_subdir_name=spatial_subdir_name,
+                project_id=project_public_id,
+                document_index=document_index,
+                source_url=download_url,
+                suggested_name=str(spatial_document.get("name") or f"document_{document_index:03d}"),
+                response_content_type=response_content_type,
+                raw_bytes=raw_bytes,
+            )
+            enriched["byteSize"] = len(raw_bytes)
         except Exception as exc:  # noqa: BLE001
             enriched["downloadError"] = str(exc)
 
@@ -473,16 +558,15 @@ def main() -> int:
         if args.batch_size <= 0:
             raise SystemExit("--batch-size deve ser maior que zero.")
 
-        list_path, projects_dir = build_paths(snapshot_date)
+        snapshot_dir, list_path, projects_dir, spatial_dir = build_paths(snapshot_date)
         failure_log_path = build_failure_log_path(snapshot_date)
 
         # Descompacta o snapshot se estiver zipado
-        snapshot_dir = list_path.parent.parent
         zip_path = snapshot_dir.parent / f"{snapshot_dir.name}.zip"
-        unpacked = False
-        if not snapshot_dir.exists() and zip_path.exists():
-            unpack_archive(zip_path, label="bronze", step=1, total=1)
-            unpacked = True
+        core_zip_path = snapshot_dir.parent / f"{snapshot_dir.name}_core.zip"
+        core_part_paths = list(snapshot_dir.parent.glob(f"{snapshot_dir.name}_core_*.zip"))
+        if not snapshot_dir.exists() and (zip_path.exists() or core_zip_path.exists() or core_part_paths):
+            unpack_snapshot_bundle(snapshot_dir.parent, snapshot_dir.name, label="bronze", step=1, total=1)
 
         projects = load_projects(list_path)
         total_detected = len(projects)
@@ -491,6 +575,11 @@ def main() -> int:
 
         total_to_process = len(projects)
         projects_dir.mkdir(parents=True, exist_ok=True)
+        write_failure_log(
+            log_path=failure_log_path,
+            snapshot_date=snapshot_date,
+            failure_entries=[],
+        )
 
         print("Iniciando extracao de detalhes de projetos da Cercarbono")
         print(f"Lista carregada de: {list_path}")
@@ -504,6 +593,7 @@ def main() -> int:
             f"{args.batch_sleep_seconds} segundos a cada {args.batch_size} projetos"
         )
         print(f"Diretorio de saida: {projects_dir}")
+        print(f"Diretorio espacial do snapshot: {spatial_dir}")
         print(f"Arquivo de falhas: {failure_log_path}")
 
         success_count = 0
@@ -524,6 +614,9 @@ def main() -> int:
                 )
                 enrich_spatial_documents(
                     detail_payload=detail_payload,
+                    snapshot_dir=snapshot_dir,
+                    spatial_subdir_name=DEFAULT_SPATIAL_SUBDIR_NAME,
+                    project_public_id=project_public_id,
                     project_internal_id=project_internal_id,
                     timeout=args.timeout,
                 )
@@ -582,8 +675,15 @@ def main() -> int:
         print(f"projetos pulados: {skipped_count}")
         print(f"diretorio de saida: {projects_dir}")
 
-        # Compacta o diretorio do snapshot em ZIP
-        pack_directory(snapshot_dir, label="bronze", step=1, total=1)
+        # Compacta o snapshot em bundle core + partes espaciais
+        pack_snapshot_bundle(
+            snapshot_dir,
+            label="bronze",
+            step=1,
+            total=1,
+            spatial_subdir_name=DEFAULT_SPATIAL_SUBDIR_NAME,
+            spatial_part_max_bytes=args.spatial_part_max_bytes,
+        )
 
         return 0 if failure_count == 0 else 1
 

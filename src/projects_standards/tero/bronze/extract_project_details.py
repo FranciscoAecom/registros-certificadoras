@@ -1,22 +1,22 @@
 # Objetivo do script:
 # Ler a lista bruta de uma data especifica, consultar o detalhe de cada projeto e salvar um JSON bronze por projeto.
 # Processo:
-# 1. Ler argumentos CLI (--date, --limit, parametros de ritmo e retry).
-# 2. Descompactar o snapshot se estiver zipado.
+# 1. Ler argumentos CLI (--date, --limit, parametros de ritmo, retry e empacotamento espacial).
+# 2. Descompactar o snapshot se estiver salvo em ZIP simples ou bundle core+spatial.
 # 3. Carregar lista de projetos do snapshot da data informada.
 # 4. Identificar projetos pendentes (sem arquivo de detalhe ou com --force).
 # 5. Exibir cabecalho com parametros da execucao.
 # 6. Para cada projeto, consultar o endpoint de detalhe da certificadora.
-# 7. Montar payload com source, list_data e detail_data.
+# 7. Baixar artefatos espaciais quando existirem e salva-los como arquivos do snapshot.
+# 8. Montar payload com source, list_data e detail_data apontando para os arquivos espaciais.
 # 8. Salvar um JSON por projeto no diretorio projects/ do snapshot.
 # 9. Exibir progresso a cada 10 projetos (percentual e tempo restante).
 # 10. Registrar falhas individuais sem interromper a execucao.
 # 11. Exibir resumo final e gravar log de falhas se houver.
-# 12. Compactar o diretorio do snapshot em ZIP.
+# 12. Compactar o snapshot em bundle core + partes espaciais.
 
 
 import argparse
-import base64
 import json
 import re
 import ssl
@@ -33,7 +33,11 @@ _ROOT = Path(__file__).resolve().parents[4]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
+from src.projects_standards.shared.archive_data import (
+    DEFAULT_SPATIAL_PART_MAX_BYTES,
+    pack_snapshot_bundle,
+    unpack_snapshot_bundle,
+)
 
 
 LIST_PAGE_URL = "https://terocarbon.com/home/projetos/"
@@ -46,6 +50,7 @@ DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_RETRY_ATTEMPTS = 3
 DEFAULT_RETRY_SLEEP_SECONDS = 5.0
 DEFAULT_PROGRESS_REPORT_EVERY = 10
+DEFAULT_SPATIAL_SUBDIR_NAME = "spatial"
 
 
 # Extrai links do HTML publico preservando href e texto associado.
@@ -125,6 +130,12 @@ def parse_args() -> argparse.Namespace:
         "--overwrite-existing",
         action="store_true",
         help="Sobrescreve arquivos de detalhe ja salvos para a mesma data.",
+    )
+    parser.add_argument(
+        "--spatial-part-max-bytes",
+        type=int,
+        default=DEFAULT_SPATIAL_PART_MAX_BYTES,
+        help="Teto em bytes para cada ZIP spatial_<n>. Padrao seguro abaixo do limite do Git LFS.",
     )
     parser.add_argument(
         "--insecure-ssl",
@@ -209,12 +220,14 @@ def print_progress_report(started_at: float, completed_items: int, total_items: 
 
 
 # Monta os caminhos de entrada e saida usados pelo script.
-def build_paths(snapshot_date: str) -> tuple[Path, Path, Path]:
+def build_paths(snapshot_date: str) -> tuple[Path, Path, Path, Path, Path]:
     root = Path(__file__).resolve().parents[4]
-    list_path = root / "data" / "project_standards" / "01_bronze" / "tero" / snapshot_date / "list" / "projects.json"
-    projects_dir = root / "data" / "project_standards" / "01_bronze" / "tero" / snapshot_date / "projects"
+    snapshot_dir = root / "data" / "project_standards" / "01_bronze" / "tero" / snapshot_date
+    list_path = snapshot_dir / "list" / "projects.json"
+    projects_dir = snapshot_dir / "projects"
+    spatial_dir = snapshot_dir / DEFAULT_SPATIAL_SUBDIR_NAME
     errors_path = Path(__file__).resolve().parent / "logs" / f"extract_project_details_failures_{snapshot_date}.json"
-    return list_path, projects_dir, errors_path
+    return snapshot_dir, list_path, projects_dir, spatial_dir, errors_path
 
 
 # Carrega os registros salvos no snapshot bruto da lista.
@@ -229,14 +242,62 @@ def load_list_records(list_path: Path) -> list[dict[str, Any]]:
 
 
 # Normaliza o valor para uso seguro em nomes de arquivo.
-def sanitize_filename(value: str) -> str:
+def sanitize_filename(value: str, fallback: str = "project") -> str:
     cleaned = re.sub(r'[<>:"/\\\\|?*]+', "_", value).strip()
-    return cleaned or "project"
+    return cleaned or fallback
 
 
 # Resolve o identificador publico do projeto a partir dos dados disponiveis.
 def resolve_project_public_id(project: dict[str, Any], index: int) -> str:
     return sanitize_filename(str(project.get("slug") or f"tero_project_{index}"))
+
+
+# Infere uma extensao segura para o anexo espacial.
+def infer_spatial_extension(source_url: str, response_content_type: str, fallback_name: str) -> str:
+    source_path = parse.urlparse(source_url).path
+    source_suffix = Path(source_path).suffix.lower()
+    if source_suffix in {".kml", ".kmz", ".geojson", ".zip", ".shp"}:
+        return source_suffix
+
+    fallback_suffix = Path(fallback_name).suffix.lower()
+    if fallback_suffix in {".kml", ".kmz", ".geojson", ".zip", ".shp"}:
+        return fallback_suffix
+
+    lower_content_type = response_content_type.lower()
+    if "google-earth.kmz" in lower_content_type:
+        return ".kmz"
+    if "google-earth.kml" in lower_content_type:
+        return ".kml"
+    if "geo+json" in lower_content_type or "geojson" in lower_content_type:
+        return ".geojson"
+    if "zip" in lower_content_type:
+        return ".zip"
+    return ""
+
+
+# Persiste um documento espacial no snapshot e retorna o caminho relativo salvo.
+def persist_spatial_document(
+    *,
+    snapshot_dir: Path,
+    spatial_subdir_name: str,
+    project_id: str,
+    document_index: int,
+    source_url: str,
+    suggested_name: str,
+    response_content_type: str,
+    raw_bytes: bytes,
+) -> str:
+    extension = infer_spatial_extension(source_url, response_content_type, suggested_name)
+    fallback_name = f"document_{document_index:03d}{extension}"
+    safe_name = sanitize_filename(suggested_name, fallback_name)
+    if extension and not safe_name.lower().endswith(extension):
+        safe_name = f"{safe_name}{extension}"
+
+    relative_path = Path(spatial_subdir_name) / project_id / f"{document_index:03d}_{safe_name}"
+    target_path = snapshot_dir / relative_path
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_bytes(raw_bytes)
+    return relative_path.as_posix()
 
 
 # Grava o log consolidado de falhas da execucao.
@@ -484,6 +545,9 @@ def resolve_spatial_download_target(link: dict[str, str]) -> dict[str, str] | No
 def enrich_spatial_documents(
     *,
     detail_html: str,
+    snapshot_dir: Path,
+    spatial_subdir_name: str,
+    project_id: str,
     timeout: float,
     retry_attempts: int,
     retry_sleep_seconds: float,
@@ -495,7 +559,7 @@ def enrich_spatial_documents(
         return page_links, []
 
     enriched_documents: list[dict[str, Any]] = []
-    for link in spatial_links:
+    for document_index, link in enumerate(spatial_links, start=1):
         enriched = dict(link)
         target = resolve_spatial_download_target(link)
         if target is None:
@@ -510,16 +574,42 @@ def enrich_spatial_documents(
                 retry_sleep_seconds=retry_sleep_seconds,
                 ssl_context=ssl_context,
             )
+            relative_path = persist_spatial_document(
+                snapshot_dir=snapshot_dir,
+                spatial_subdir_name=spatial_subdir_name,
+                project_id=project_id,
+                document_index=document_index,
+                source_url=target["downloadUrl"],
+                suggested_name=target["filename"],
+                response_content_type=target["contentType"] or response_content_type,
+                raw_bytes=raw_bytes,
+            )
             enriched["downloadUrl"] = target["downloadUrl"]
             enriched["name"] = target["filename"]
             enriched["contentType"] = target["contentType"] or response_content_type
-            enriched["contentEncoding"] = "base64"
-            enriched["content"] = base64.b64encode(raw_bytes).decode("ascii")
+            enriched["storageMode"] = "snapshot_file"
+            enriched["snapshotRelativePath"] = relative_path
+            enriched["byteSize"] = len(raw_bytes)
         except Exception as exc:  # noqa: BLE001
             enriched["downloadError"] = str(exc)
         enriched_documents.append(enriched)
 
     return page_links, enriched_documents
+
+
+# Verifica se o detalhe salvo ja preserva documentos espaciais no formato atual.
+def has_valid_external_spatial_documents(detail_data: dict[str, Any]) -> bool:
+    spatial_documents = detail_data.get("spatial_documents")
+    if not isinstance(spatial_documents, list) or not spatial_documents:
+        return False
+    for document in spatial_documents:
+        if not isinstance(document, dict):
+            return False
+        if document.get("downloadError"):
+            continue
+        if not document.get("snapshotRelativePath"):
+            return False
+    return True
 
 
 # Verifica se o arquivo de saida existente ja pode ser reaproveitado.
@@ -537,8 +627,13 @@ def existing_output_is_valid(output_path: Path, project_public_id: str) -> bool:
     if not isinstance(source, dict) or not isinstance(detail_data, dict):
         return False
     page_html = detail_data.get("page_html")
-    spatial_documents = detail_data.get("spatial_documents")
-    if isinstance(page_html, str) and "google.com/maps/d/" in page_html and not spatial_documents:
+    page_links = detail_data.get("page_links")
+    detected_spatial_links: list[dict[str, str]] = []
+    if isinstance(page_links, list):
+        detected_spatial_links = collect_spatial_links([item for item in page_links if isinstance(item, dict)])
+    elif isinstance(page_html, str):
+        detected_spatial_links = collect_spatial_links(extract_page_links(page_html))
+    if detected_spatial_links and not has_valid_external_spatial_documents(detail_data):
         return False
     return source.get("project_public_id") == project_public_id
 
@@ -619,6 +714,9 @@ def process_projects(
             )
             page_links, spatial_documents = enrich_spatial_documents(
                 detail_html=detail_html,
+                snapshot_dir=projects_dir.parent,
+                spatial_subdir_name=DEFAULT_SPATIAL_SUBDIR_NAME,
+                project_id=project_public_id,
                 timeout=timeout,
                 retry_attempts=retry_attempts,
                 retry_sleep_seconds=retry_sleep_seconds,
@@ -692,16 +790,15 @@ def main() -> int:
     if args.retry_attempts < 0:
         raise SystemExit("--retry-attempts nao pode ser negativo.")
 
-    list_path, projects_dir, errors_path = build_paths(snapshot_date)
+    snapshot_dir, list_path, projects_dir, spatial_dir, errors_path = build_paths(snapshot_date)
     ssl_context = ssl._create_unverified_context() if args.insecure_ssl else ssl.create_default_context()
 
     # Descompacta o snapshot se estiver zipado
-    snapshot_dir = list_path.parent.parent
     zip_path = snapshot_dir.parent / f"{snapshot_dir.name}.zip"
-    unpacked = False
-    if not snapshot_dir.exists() and zip_path.exists():
-        unpack_archive(zip_path, label="bronze", step=1, total=1)
-        unpacked = True
+    core_zip_path = snapshot_dir.parent / f"{snapshot_dir.name}_core.zip"
+    core_part_paths = list(snapshot_dir.parent.glob(f"{snapshot_dir.name}_core_*.zip"))
+    if not snapshot_dir.exists() and (zip_path.exists() or core_zip_path.exists() or core_part_paths):
+        unpack_snapshot_bundle(snapshot_dir.parent, snapshot_dir.name, label="bronze", step=1, total=1)
 
     records = load_list_records(list_path)
     total_to_process = args.limit or len(records)
@@ -710,6 +807,7 @@ def main() -> int:
     print(f"Data do snapshot: {snapshot_date}")
     print(f"Lista de origem: {list_path}")
     print(f"Diretorio de saida: {projects_dir}")
+    print(f"Diretorio espacial do snapshot: {spatial_dir}")
     print(f"Arquivo de falhas: {errors_path}")
     print(f"URL publica da lista: {LIST_PAGE_URL}")
     print(f"Endpoint base do detalhe: {DETAIL_API_URL_TEMPLATE}")
@@ -749,8 +847,15 @@ def main() -> int:
         f"Sucessos: {success_count}. Falhas: {failure_count}. Pulados: {skipped_count}."
     )
 
-    # Compacta o diretorio do snapshot em ZIP
-    pack_directory(snapshot_dir, label="bronze", step=1, total=1)
+    # Compacta o snapshot em bundle core + partes espaciais
+    pack_snapshot_bundle(
+        snapshot_dir,
+        label="bronze",
+        step=1,
+        total=1,
+        spatial_subdir_name=DEFAULT_SPATIAL_SUBDIR_NAME,
+        spatial_part_max_bytes=args.spatial_part_max_bytes,
+    )
 
     return 0 if failure_count == 0 else 1
 

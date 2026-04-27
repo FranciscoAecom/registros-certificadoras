@@ -53,9 +53,27 @@
   - `GET https://terocarbon.com/project/<slug>/`
 - O script tambem extrai links da pagina publica em `detail_data.page_links`.
 - Quando houver Google My Maps ou anexos espaciais diretos, o script baixa e preserva esses artefatos em `detail_data.spatial_documents`.
+- Os binarios espaciais nao ficam embutidos no JSON bronze.
+- Cada item de `detail_data.spatial_documents` referencia o arquivo bruto salvo no snapshot por:
+  - `storageMode: snapshot_file`
+  - `snapshotRelativePath`
+  - `byteSize`
 - O vinculo entre lista e detalhe usa:
   - `slug` como `project_public_id`
   - `id` como `project_internal_id`
+
+### Formato Atual do Snapshot Bronze
+
+- O snapshot de detalhe da TERO passou a usar bundle `core + spatial`.
+- Estrutura esperada em repouso:
+  - `YYYYMMDD_core.zip` quando o core couber em um unico arquivo
+  - `YYYYMMDD_core_001.zip`, `YYYYMMDD_core_002.zip`, ... quando o core precisar ser particionado
+  - `YYYYMMDD_spatial_001.zip`, `YYYYMMDD_spatial_002.zip`, ... para anexos espaciais
+- Dentro do snapshot descompactado:
+  - `list/projects.json`
+  - `projects/<project_public_id>.json`
+  - `spatial/<project_public_id>/...`
+- A criacao das partes `spatial_<n>` e automatica e usa o teto configuravel de `--spatial-part-max-bytes`.
 
 ### Regras de Implementacao para esta Integracao
 

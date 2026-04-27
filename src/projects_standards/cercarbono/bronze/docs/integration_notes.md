@@ -34,12 +34,30 @@
 - O detalhe tambem retorna JSON diretamente, sem necessidade de navegador headless.
 - O frontend expoe anexos de cartografia em `Technical data > Formulation > Cartography`.
 - Esses anexos aparecem no payload de documentos como itens `type=documentLocation`.
-- Quando presentes, os ZIPs cartograficos devem ser baixados e preservados no bronze em `detail_data.spatial_documents`.
+- Quando presentes, os anexos cartograficos devem ser baixados e preservados no bronze em `detail_data.spatial_documents`.
+- Os binarios espaciais nao ficam embutidos no JSON bronze.
+- Cada item de `detail_data.spatial_documents` referencia o arquivo bruto salvo no snapshot por:
+  - `storageMode: snapshot_file`
+  - `snapshotRelativePath`
+  - `byteSize`
 - Os endpoints exigem os headers usados pelo frontend, em especial:
   - `Platform: ecoregistry`
   - `Lng: en`
 - Como esta integracao nao precisa de navegador nem sessao persistente, o teardown esperado e leve.
 - Mesmo assim, os scripts usam um contexto gerenciado de encerramento para padronizar limpeza explicita e permitir evolucao futura sem deixar recursos orfaos.
+
+### Formato Atual do Snapshot Bronze
+
+- O snapshot de detalhe da Cercarbono passou a usar bundle `core + spatial`.
+- Estrutura esperada em repouso:
+  - `YYYYMMDD_core.zip` quando o core couber em um unico arquivo
+  - `YYYYMMDD_core_001.zip`, `YYYYMMDD_core_002.zip`, ... quando o core precisar ser particionado
+  - `YYYYMMDD_spatial_001.zip`, `YYYYMMDD_spatial_002.zip`, ... para anexos espaciais
+- Dentro do snapshot descompactado:
+  - `list/projects.json`
+  - `projects/<project_public_id>.json`
+  - `spatial/<project_public_id>/...`
+- A criacao das partes `spatial_<n>` e automatica e usa o teto configuravel de `--spatial-part-max-bytes`.
 
 ### Logging Operacional
 
