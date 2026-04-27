@@ -2,7 +2,7 @@
 # Ler a lista bruta de uma data especifica, consultar o detalhe de cada projeto e salvar um JSON bronze por projeto.
 # Processo:
 # 1. Ler argumentos CLI (--date, --limit, parametros de ritmo e retry).
-# 2. Descompactar o snapshot se estiver zipado.
+# 2. Descompactar o snapshot se estiver salvo em ZIP simples ou bundle core+spatial.
 # 3. Carregar lista de projetos do snapshot da data informada.
 # 4. Identificar projetos pendentes (sem arquivo de detalhe ou com --force).
 # 5. Exibir cabecalho com parametros da execucao.
@@ -12,7 +12,7 @@
 # 9. Exibir progresso a cada 10 projetos (percentual e tempo restante).
 # 10. Registrar falhas individuais sem interromper a execucao.
 # 11. Exibir resumo final e gravar log de falhas se houver.
-# 12. Compactar o diretorio do snapshot em ZIP.
+# 12. Compactar o snapshot em bundle core + partes espaciais quando aplicavel.
 
 
 import argparse
@@ -32,7 +32,7 @@ _ROOT = Path(__file__).resolve().parents[4]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
+from src.projects_standards.shared.archive_data import pack_snapshot_bundle, unpack_snapshot_bundle
 
 
 BASE_URL = "https://acr2.apx.com"
@@ -344,13 +344,14 @@ def main() -> int:
 
     list_path, projects_dir, errors_path = build_paths(snapshot_date)
 
-    # Descompacta o snapshot se estiver zipado
+    # Descompacta o snapshot se estiver em ZIP simples ou bundle core+spatial
     snapshot_dir = list_path.parent.parent
     zip_path = snapshot_dir.parent / f"{snapshot_dir.name}.zip"
     unpacked = False
-    if not snapshot_dir.exists() and zip_path.exists():
-        unpack_archive(zip_path, label="bronze", step=1, total=1)
-        unpacked = True
+    core_zip_path = snapshot_dir.parent / f"{snapshot_dir.name}_core.zip"
+    core_part_paths = list(snapshot_dir.parent.glob(f"{snapshot_dir.name}_core_*.zip"))
+    if not snapshot_dir.exists() and (zip_path.exists() or core_zip_path.exists() or core_part_paths):
+        unpack_snapshot_bundle(snapshot_dir.parent, snapshot_dir.name, label="bronze", step=1, total=1)
 
     projects = load_projects(list_path)
     total_detected = len(projects)
@@ -465,8 +466,8 @@ def main() -> int:
 
     print(f"Execucao finalizada. Sucessos: {success_count}. Falhas: {failure_count}. Pulados: {skipped_count}.")
 
-    # Compacta o diretorio do snapshot em ZIP
-    pack_directory(snapshot_dir, label="bronze", step=1, total=1)
+    # Compacta o snapshot em bundle core + partes espaciais quando aplicavel
+    pack_snapshot_bundle(snapshot_dir, label="bronze", step=1, total=1)
 
     return 0 if failure_count == 0 else 1
 

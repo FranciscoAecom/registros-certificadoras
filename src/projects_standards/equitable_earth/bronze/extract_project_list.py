@@ -3,12 +3,12 @@
 # Processo:
 # 1. Ler argumentos CLI (--date, parametros de ritmo e retry).
 # 2. Validar data e montar diretorio de saida do snapshot.
-# 3. Descompactar o snapshot da data solicitada se estiver zipado.
+# 3. Descompactar o snapshot da data solicitada se estiver salvo em ZIP simples ou bundle core+spatial.
 # 4. Exibir cabecalho com parametros da execucao.
 # 5. Consultar endpoint da certificadora com paginacao.
 # 6. Acumular todos os registros da lista.
 # 7. Salvar snapshot completo em JSON no diretorio list/ do snapshot.
-# 8. Compactar o diretorio do snapshot em ZIP.
+# 8. Compactar o snapshot em bundle core + partes espaciais quando aplicavel.
 # 9. Exibir resumo da execucao.
 
 
@@ -25,7 +25,7 @@ _ROOT = Path(__file__).resolve().parents[4]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from src.projects_standards.shared.archive_data import pack_directory, unpack_archive
+from src.projects_standards.shared.archive_data import pack_snapshot_bundle, unpack_snapshot_bundle
 
 
 TENANT_CODE = "ERS"
@@ -309,11 +309,13 @@ def main() -> int:
 
     output_path, errors_path = build_paths(snapshot_date)
 
-    # Descompacta o snapshot da data solicitada se estiver zipado
+    # Descompacta o snapshot da data solicitada se estiver em ZIP simples ou bundle core+spatial
     snapshot_dir = output_path.parent.parent
     zip_path = snapshot_dir.parent / f"{snapshot_dir.name}.zip"
-    if not snapshot_dir.exists() and zip_path.exists():
-        unpack_archive(zip_path, label="bronze", step=1, total=1)
+    core_zip_path = snapshot_dir.parent / f"{snapshot_dir.name}_core.zip"
+    core_part_paths = list(snapshot_dir.parent.glob(f"{snapshot_dir.name}_core_*.zip"))
+    if not snapshot_dir.exists() and (zip_path.exists() or core_zip_path.exists() or core_part_paths):
+        unpack_snapshot_bundle(snapshot_dir.parent, snapshot_dir.name, label="bronze", step=1, total=1)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     write_failure_log(errors_path=errors_path, snapshot_date=snapshot_date, failures=[])
@@ -369,9 +371,9 @@ def main() -> int:
     print(f"Total informado pela API: {payload.get('total_records')}")
     print("Execucao finalizada com sucesso")
 
-    # Compacta o diretorio do snapshot em ZIP
+    # Compacta o snapshot em bundle core + partes espaciais quando aplicavel
     snapshot_dir = output_path.parent.parent
-    pack_directory(snapshot_dir, label="bronze", step=1, total=1)
+    pack_snapshot_bundle(snapshot_dir, label="bronze", step=1, total=1)
 
     return 0
 
