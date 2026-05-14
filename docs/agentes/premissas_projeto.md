@@ -33,7 +33,7 @@ Cada certificadora deve seguir dois passos independentes:
 - Validar mapeamentos `bronze -> silver` com amostra representativa do snapshot, e não apenas por inspeção pontual.
 - Separar descoberta exploratória de mapeamento e execução recorrente do mapeamento canônico.
 
-## Estrutura de C?digo
+## Estrutura de Código
 
 ```text
 src/projects_standards/<certificadora>/bronze/extract_project_list.py
